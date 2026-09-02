@@ -1,0 +1,11 @@
+{
+  "name": "SnowyCraftingCore",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/snowlance7/SnowyCraftingCore",
+  "description": "Personal crafting library for my mods",
+  "dependencies": [
+    "BepInEx-BepInExPack-5.4.2305",
+    "TeamXiaolan-DawnLib-0.9.25",
+    "Snowlance-SnowyLib-1.14.1"
+  ]
+}

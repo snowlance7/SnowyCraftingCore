@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1963577118, guid: 1f73291e6cf64124796e048d841e7d1f, type: 3}
+  m_Name: ChemicalDistilleryDef
+  m_EditorClassIdentifier: 
+  _configEntries: []
+  _tags: []
+  <Key>k__BackingField:
+    _namespace: snowy_crafting_core
+    _key: chemical_distillery
+  <UnlockableItem>k__BackingField:
+    unlockableName: Chemical Distillery
+    prefabObject: {fileID: 309840683652417385, guid: 39d6e71687cc3bb4dae4bfe2599f2b86,
+      type: 3}
+    unlockableType: 0
+    shopSelectionNode: {fileID: 11400000, guid: e5aded52afc84af40b27ddf7021179ed,
+      type: 2}
+    alwaysInStock: 1
+    IsPlaceable: 1
+    hasBeenMoved: 0
+    placedPosition: {x: 0, y: 0, z: 0}
+    placedRotation: {x: 0, y: 0, z: 0}
+    luckValue: 0
+    inStorage: 0
+    canBeStored: 1
+    maxNumber: 1
+    hasBeenUnlockedByPlayer: 0
+    suitMaterial: {fileID: 0}
+    headCostumeObject: {fileID: 0}
+    lowerTorsoCostumeObject: {fileID: 0}
+    alreadyUnlocked: 0
+    unlockedInChallengeFile: 0
+    spawnPrefab: 1
+    jumpAudio: {fileID: 0}
+  <InfoNodeText>k__BackingField: 
+  <TerminalPredicate>k__BackingField: {fileID: 0}
+  <PricingStrategy>k__BackingField: {fileID: 0}
+  <Cost>k__BackingField: 150
+  <IsShipUpgrade>k__BackingField: 0
+  <IsDecor>k__BackingField: 1
+  <GenerateCostConfig>k__BackingField: 1
+  <GenerateUnlockableTypeConfig>k__BackingField: 0
+  <GenerateDisablePricingStrategyConfig>k__BackingField: 1
+  <GenerateDisableUnlockRequirementConfig>k__BackingField: 1
