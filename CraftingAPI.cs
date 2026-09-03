@@ -13,20 +13,34 @@ namespace SnowyCraftingCore
 
         public static void RegisterIngredient(AnalyzableIngredient ingredient)
         {
-            if (AnalyzerBehavior.RegisteredIngredients.Contains(ingredient)) { logger.LogError($"Could not register analyzable ingredient {ingredient}, a similar analyzable ingredient already exists"); return; }
-            AnalyzerBehavior.RegisteredIngredients.Add(ingredient);
+            if (AnalyzerBehavior.RegisteredAnalyzableIngredients.Contains(ingredient)) { logger.LogError($"Could not register analyzable ingredient {ingredient}, a similar analyzable ingredient already exists"); return; }
+            AnalyzerBehavior.RegisteredAnalyzableIngredients.Add(ingredient);
         }
 
         public static void RegisterRecipe(ChemistryRecipe recipe)
         {
-            if (ChemicalMixerBehavior.RegisteredRecipies.Contains(recipe)) { logger.LogError($"Could not register chemistry recipe {recipe}, a similar recipe already exists"); return; }
-            ChemicalMixerBehavior.RegisteredRecipies.Add(recipe);
+            if (ChemicalMixerBehavior.RegisteredRecipes.Contains(recipe)) { logger.LogError($"Could not register chemistry recipe {recipe}, a similar recipe already exists"); return; }
+            ChemicalMixerBehavior.RegisteredRecipes.Add(recipe);
         }
 
         public static void RegisterRecipe(DistilleryRecipe recipe)
         {
-            if (AlembicBehavior.RegisteredRecipies.Contains(recipe)) { logger.LogError($"Could not register distillery recipe {recipe}, a similar recipe already exists"); return; }
-            AlembicBehavior.RegisteredRecipies.Add(recipe);
+            if (AlembicBehavior.RegisteredRecipes.Contains(recipe)) { logger.LogError($"Could not register distillery recipe {recipe}, a similar recipe already exists"); return; }
+            AlembicBehavior.RegisteredRecipes.Add(recipe);
+        }
+
+        public static void LogRecipies()
+        {
+            logger.LogDebug("Alembic recipes");
+            foreach (var recipe in AlembicBehavior.RegisteredRecipes)
+            {
+                logger.LogDebug(recipe);
+            }
+            logger.LogDebug("ChemistryMixer recipes");
+            foreach (var recipe2 in ChemicalMixerBehavior.RegisteredRecipes)
+            {
+                logger.LogDebug(recipe2);
+            }
         }
     }
 }

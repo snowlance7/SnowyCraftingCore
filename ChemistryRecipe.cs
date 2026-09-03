@@ -19,7 +19,7 @@ namespace SnowyCraftingCore
 
         public override string ToString()
         {
-            return ingredientA + "|" + ingredientB;
+            return ingredientA + " + " + ingredientB + " = ???";
         }
     }
 }

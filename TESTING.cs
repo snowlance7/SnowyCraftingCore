@@ -43,6 +43,9 @@ namespace SnowyCraftingCore
 
                 switch (args[0])
                 {
+                    case "/recipes":
+                        CraftingAPI.LogRecipies();
+                        break;
                     default:
                         break;
                 }

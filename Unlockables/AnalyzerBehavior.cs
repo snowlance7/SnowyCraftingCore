@@ -10,7 +10,7 @@ namespace SnowyCraftingCore.Unlockables
 {
     internal class AnalyzerBehavior : NetworkBehaviour
     {
-        public static List<AnalyzableIngredient> RegisteredIngredients { get; internal set; } = [];
+        public static List<AnalyzableIngredient> RegisteredAnalyzableIngredients { get; internal set; } = [];
 
         [SerializeField] Animator animator = null!;
         [SerializeField] AudioSource audioSource = null!;
@@ -39,19 +39,15 @@ namespace SnowyCraftingCore.Unlockables
         public void OnTriggerInteract() // Interact trigger
         {
             var obj = localPlayer.currentlyHeldObjectServer;
-            if (inAnimation || obj == null || (obj is not IAnalyzableIngredient && !RegisteredIngredients.Any(x => x.item == obj.itemProperties))) { return; }
+            if (inAnimation || obj == null || (obj is not IAnalyzableIngredient && !RegisteredAnalyzableIngredients.Any(x => x.item == obj.itemProperties))) { return; }
             ProcessIngredientRpc(obj.NetworkObject);
         }
 
         private void SetTestTubeColor(ChemistryLiquidAppearance color)
         {
-            Material material = new(testTubeRenderer.material);
-
-            material.color = color.liquidColor;
-            material.SetColor("_EmissionColor", color.liquidColor);
-            material.SetFloat("_EmissionIntensity", color.emissionIntensity);
-
-            testTubeRenderer.material = material;
+            testTubeRenderer.material.color = color.liquidColor;
+            testTubeRenderer.material.SetColor("_EmissionColor", color.liquidColor);
+            testTubeRenderer.material.SetFloat("_EmissionIntensity", color.emissionIntensity);
         }
 
         [Rpc(SendTo.Everyone)]
@@ -70,7 +66,7 @@ namespace SnowyCraftingCore.Unlockables
                 despawningIngredientItem = _ingredient.DespawnItemAfterAnalyzing();
             }
 
-            ingredient ??= RegisteredIngredients.Where(x => x.item == item.itemProperties).FirstOrDefault();
+            ingredient ??= RegisteredAnalyzableIngredients.Where(x => x.item == item.itemProperties).FirstOrDefault();
 
             if (ingredient == null) { return; }
 

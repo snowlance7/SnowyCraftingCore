@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using Unity.Netcode;
 using UnityEngine;
 using static SnowyCraftingCore.Plugin;
@@ -13,7 +14,7 @@ namespace SnowyCraftingCore.Unlockables
 {
     internal class AlembicBehavior : NetworkBehaviour
     {
-        public static List<DistilleryRecipe> RegisteredRecipies { get; internal set; } = [];
+        public static List<DistilleryRecipe> RegisteredRecipes { get; internal set; } = [];
 
         [SerializeField] InteractTrigger inputTrigger = null!;
 
@@ -23,7 +24,6 @@ namespace SnowyCraftingCore.Unlockables
         [SerializeField] MeshRenderer inputRenderer = null!;
         [SerializeField] MeshRenderer outputRenderer = null!;
 
-        [SerializeField] ParticleSystem inputParticleSystem = null!;
         [SerializeField] ParticleSystem outputParticleSystem = null!;
 
         [SerializeField] AudioSource audioSource = null!;
@@ -34,7 +34,13 @@ namespace SnowyCraftingCore.Unlockables
         DistilleryRecipe? currentlyMixingRecipe;
 
         bool mixing;
+        ChemistryLiquidAppearance inputDefaultColor = null!;
         const float defaultMixingTime = 10f;
+
+        public void Awake()
+        {
+            inputDefaultColor = new ChemistryLiquidAppearance(inputRenderer.material.color, 2f);
+        }
 
         public void Update()
         {
@@ -56,24 +62,20 @@ namespace SnowyCraftingCore.Unlockables
             OutputTrigger_InteractRpc(localPlayer.actualClientId);
         }
 
-        private void SetFlaskColor(bool outputFlask, ChemistryLiquidAppearance color)
+        private void SetInputFlaskColor(ChemistryLiquidAppearance color)
         {
-            Material material = new(outputRenderer.materials[0]);
+            inputRenderer.enabled = true;
+            inputRenderer.material.color = color.liquidColor;
+            inputRenderer.material.SetColor("_EmissionColor", color.liquidColor);
+            inputRenderer.material.SetFloat("_EmissionIntensity", color.emissionIntensity);
+        }
 
-            material.color = color.liquidColor;
-            material.SetColor("_EmissionColor", color.liquidColor);
-            material.SetFloat("_EmissionIntensity", color.emissionIntensity);
-
-            if (outputFlask)
-            {
-                outputRenderer.enabled = true;
-                outputRenderer.material = material;
-            }
-            else
-            {
-                inputRenderer.enabled = true;
-                inputRenderer.material = material;
-            }
+        private void SetOutputFlaskColor(ChemistryLiquidAppearance color)
+        {
+            outputRenderer.enabled = true;
+            outputRenderer.material.color = color.liquidColor;
+            outputRenderer.material.SetColor("_EmissionColor", color.liquidColor);
+            outputRenderer.material.SetFloat("_EmissionIntensity", color.emissionIntensity);
         }
 
         [Rpc(SendTo.Everyone)]
@@ -89,20 +91,24 @@ namespace SnowyCraftingCore.Unlockables
             {
                 ingredient = _ingredient.GetInputIngredient();
                 despawningIngredientItem = _ingredient.DespawnItemAfterInput();
+                logger.LogDebug($"Got IChemistryIngredient: {ingredient?.ToString()}");
             }
 
             ingredient ??= ChemicalMixerBehavior.RegisteredIngredients.Where(x => x.item == item.itemProperties).FirstOrDefault();
 
             if (ingredient == null)
             {
+                logger.LogDebug($"Unable to find registered ingredient for {item.name}, creating default ingredient");
                 Color color = UnityEngine.Random.ColorHSV();
                 ingredient = new ChemistryIngredient(item.itemProperties, new ChemistryLiquidAppearance(color, 5f));
             }
 
             inputIngredient = ingredient;
-            SetFlaskColor(outputFlask: false, ingredient.chemistryLiquidAppearance);
+            SetInputFlaskColor(ingredient.chemistryLiquidAppearance);
 
-            currentlyMixingRecipe = RegisteredRecipies.Where(x => x.ingredient == inputIngredient).FirstOrDefault();
+            currentlyMixingRecipe = RegisteredRecipes.Where(x => x.ingredient.Equals(ingredient)).FirstOrDefault();
+            if (item is IDistillableIngredient distillableIngredient) { currentlyMixingRecipe = new DistilleryFixedOutputReaction(ingredient, distillableIngredient.GetDistilleryOutput(), distillableIngredient.GetDistilleryMixTime()); }
+            logger.LogDebug(currentlyMixingRecipe != null ? "Recipe found" : "Recipe not found");
 
             if (localPlayer == item.playerHeldBy && despawningIngredientItem)
                 localPlayer.DespawnHeldObject();
@@ -158,7 +164,6 @@ namespace SnowyCraftingCore.Unlockables
             {
                 yield return null;
 
-                inputParticleSystem.Play();
                 audioSource.Play();
 
                 float mixTime = currentlyMixingRecipe != null && currentlyMixingRecipe.mixTime > 0 ? currentlyMixingRecipe.mixTime : defaultMixingTime;
@@ -168,13 +173,15 @@ namespace SnowyCraftingCore.Unlockables
                 if (currentlyMixingRecipe != null)
                 {
                     outputIngredient = currentlyMixingRecipe.reaction.Invoke(inputIngredient!);
-                    SetFlaskColor(outputFlask: true, outputIngredient.chemistryLiquidAppearance);
+                    if (outputIngredient != null)
+                    {
+                        SetOutputFlaskColor(outputIngredient.chemistryLiquidAppearance);
+                        outputParticleSystem.Play();
+                    }
                 }
 
-                inputParticleSystem.Stop();
-                outputParticleSystem.Play();
+                SetInputFlaskColor(inputDefaultColor);
                 inputIngredient = null;
-                inputRenderer.enabled = false;
                 mixing = false;
             }
 

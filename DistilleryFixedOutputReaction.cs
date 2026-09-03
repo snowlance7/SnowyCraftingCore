@@ -4,5 +4,5 @@ using System.Text;
 
 namespace SnowyCraftingCore
 {
-    public class DistilleryFixedOutputReaction(ChemistryIngredient ingredient, ChemistryIngredient output, float mixTime = -1) : DistilleryRecipe(ingredient, (ingredient) => output, mixTime);
+    public class DistilleryFixedOutputReaction(ChemistryIngredient ingredient, ChemistryIngredient? output, float mixTime = -1) : DistilleryRecipe(ingredient, (ingredient) => output, mixTime);
 }

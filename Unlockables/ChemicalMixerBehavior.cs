@@ -14,7 +14,7 @@ namespace SnowyCraftingCore.Unlockables
     internal class ChemicalMixerBehavior : NetworkBehaviour
     {
         public static List<ChemistryIngredient> RegisteredIngredients { get; internal set; } = [];
-        public static List<ChemistryRecipe> RegisteredRecipies { get; internal set; } = [];
+        public static List<ChemistryRecipe> RegisteredRecipes { get; internal set; } = [];
 
         [SerializeField] InteractTrigger input1Trigger = null!;
         [SerializeField] InteractTrigger input2Trigger = null!;
@@ -95,31 +95,28 @@ namespace SnowyCraftingCore.Unlockables
             OutputTrigger_InteractRpc(localPlayer.actualClientId);
         }
 
-        private void SetFlaskColor(int flaskIndex, ChemistryLiquidAppearance color)
+        private void SetInput1FlaskColor(ChemistryLiquidAppearance color)
         {
-            Material material = new(outputRenderer.materials[0]);
+            input1Renderer.enabled = true;
+            input1Renderer.material.color = color.liquidColor;
+            input1Renderer.material.SetColor("_EmissionColor", color.liquidColor);
+            input1Renderer.material.SetFloat("_EmissionIntensity", color.emissionIntensity);
+        }
 
-            material.color = color.liquidColor;
-            material.SetColor("_EmissionColor", color.liquidColor);
-            material.SetFloat("_EmissionIntensity", color.emissionIntensity);
+        private void SetInput2FlaskColor(ChemistryLiquidAppearance color)
+        {
+            input2Renderer.enabled = true;
+            input2Renderer.material.color = color.liquidColor;
+            input2Renderer.material.SetColor("_EmissionColor", color.liquidColor);
+            input2Renderer.material.SetFloat("_EmissionIntensity", color.emissionIntensity);
+        }
 
-            switch (flaskIndex)
-            {
-                case 1:
-                    input1Renderer.enabled = true;
-                    input1Renderer.material = material;
-                    break;
-                case 2:
-                    input2Renderer.enabled = true;
-                    input2Renderer.material = material;
-                    break;
-                case 3:
-                    outputRenderer.enabled = true;
-                    outputRenderer.material = material;
-                    break;
-                default:
-                    break;
-            }
+        private void SetOutputFlaskColor(ChemistryLiquidAppearance color)
+        {
+            outputRenderer.enabled = true;
+            outputRenderer.material.color = color.liquidColor;
+            outputRenderer.material.SetColor("_EmissionColor", color.liquidColor);
+            outputRenderer.material.SetFloat("_EmissionIntensity", color.emissionIntensity);
         }
 
         [Rpc(SendTo.Everyone)]
@@ -148,12 +145,12 @@ namespace SnowyCraftingCore.Unlockables
             if (flaskInputIndex == 1)
             {
                 input1Ingredient = ingredient;
-                SetFlaskColor(1, ingredient.chemistryLiquidAppearance);
+                SetInput1FlaskColor(ingredient.chemistryLiquidAppearance);
             }
             else if (flaskInputIndex == 2)
             {
                 input2Ingredient = ingredient;
-                SetFlaskColor(2, ingredient.chemistryLiquidAppearance);
+                SetInput2FlaskColor(ingredient.chemistryLiquidAppearance);
             }
 
             if (localPlayer == item.playerHeldBy && despawningIngredientItem)
@@ -167,7 +164,7 @@ namespace SnowyCraftingCore.Unlockables
 
             if (input1Ingredient != null && input2Ingredient != null && outputIngredient == null) // Mixing
             {
-                currentlyMixingRecipe = RegisteredRecipies.Where(x => (x.ingredientA == input1Ingredient && x.ingredientB == input2Ingredient) || (x.ingredientA == input2Ingredient && x.ingredientB == input1Ingredient)).FirstOrDefault();
+                currentlyMixingRecipe = RegisteredRecipes.Where(x => (x.ingredientA == input1Ingredient && x.ingredientB == input2Ingredient) || (x.ingredientA == input2Ingredient && x.ingredientB == input1Ingredient)).FirstOrDefault();
 
                 mixing = true;
                 MixIngredients();
@@ -228,7 +225,7 @@ namespace SnowyCraftingCore.Unlockables
                 if (currentlyMixingRecipe != null)
                 {
                     outputIngredient = currentlyMixingRecipe.reaction.Invoke(input1Ingredient!, input2Ingredient!);
-                    SetFlaskColor(3, outputIngredient.chemistryLiquidAppearance);
+                    SetOutputFlaskColor(outputIngredient.chemistryLiquidAppearance);
                 }
                 else
                 {

@@ -6,7 +6,7 @@ namespace SnowyCraftingCore
 {
     public interface IAnalyzableIngredient
     {
-        public AnalyzableIngredient GetAnalyzableIngredient();
+        public AnalyzableIngredient? GetAnalyzableIngredient();
         public bool DespawnItemAfterAnalyzing();
     }
 }
