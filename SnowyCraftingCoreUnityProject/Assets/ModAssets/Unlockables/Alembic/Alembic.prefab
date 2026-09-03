@@ -13,9 +13,9 @@ GameObject:
   - component: {fileID: 5019667691255414825}
   - component: {fileID: 5711542507897054095}
   - component: {fileID: 3708383901520279530}
-  - component: {fileID: 4727524467893640815}
+  - component: {fileID: 6145285816457031961}
   m_Layer: 8
-  m_Name: ChemicalDistillery
+  m_Name: Alembic
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -196,7 +196,7 @@ MonoBehaviour:
   startingRotation: {x: 0, y: 0, z: 0}
   overrideOffset: 1
   unlockableID: -1
---- !u!114 &4727524467893640815
+--- !u!114 &6145285816457031961
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -205,7 +205,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 309840683652417385}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 1247174319, guid: b4d0c9c79fc309b40ba507d54a4ce3d5, type: 3}
+  m_Script: {fileID: 1216106391, guid: b4d0c9c79fc309b40ba507d54a4ce3d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   inputTrigger: {fileID: 3883102645996870512}
@@ -10074,8 +10074,8 @@ MonoBehaviour:
   onInteract:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 4727524467893640815}
-        m_TargetAssemblyTypeName: SnowyCraftingCore.Unlockables.ChemicalDistilleryBehavior,
+      - m_Target: {fileID: 6145285816457031961}
+        m_TargetAssemblyTypeName: SnowyCraftingCore.Unlockables.AlembicBehavior,
           Snowlance.SnowyCraftingCore
         m_MethodName: OutputTrigger_Interact
         m_Mode: 1
@@ -10533,8 +10533,8 @@ MonoBehaviour:
   onInteract:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 4727524467893640815}
-        m_TargetAssemblyTypeName: SnowyCraftingCore.Unlockables.ChemicalDistilleryBehavior,
+      - m_Target: {fileID: 6145285816457031961}
+        m_TargetAssemblyTypeName: SnowyCraftingCore.Unlockables.AlembicBehavior,
           Snowlance.SnowyCraftingCore
         m_MethodName: InputTrigger_Interact
         m_Mode: 1

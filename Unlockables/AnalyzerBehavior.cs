@@ -8,9 +8,9 @@ using static SnowyCraftingCore.Plugin;
 
 namespace SnowyCraftingCore.Unlockables
 {
-    internal class ChemicalAnalyzerBehavior : NetworkBehaviour
+    internal class AnalyzerBehavior : NetworkBehaviour
     {
-        public static List<AnalyzableIngredient> registeredIngredients { get; internal set; } = [];
+        public static List<AnalyzableIngredient> RegisteredIngredients { get; internal set; } = [];
 
         [SerializeField] Animator animator = null!;
         [SerializeField] AudioSource audioSource = null!;
@@ -39,7 +39,7 @@ namespace SnowyCraftingCore.Unlockables
         public void OnTriggerInteract() // Interact trigger
         {
             var obj = localPlayer.currentlyHeldObjectServer;
-            if (inAnimation || obj == null || (obj is not IAnalyzableIngredient && !registeredIngredients.Any(x => x.item == obj.itemProperties))) { return; }
+            if (inAnimation || obj == null || (obj is not IAnalyzableIngredient && !RegisteredIngredients.Any(x => x.item == obj.itemProperties))) { return; }
             ProcessIngredientRpc(obj.NetworkObject);
         }
 
@@ -70,7 +70,7 @@ namespace SnowyCraftingCore.Unlockables
                 despawningIngredientItem = _ingredient.DespawnItemAfterAnalyzing();
             }
 
-            ingredient ??= registeredIngredients.Where(x => x.item == item.itemProperties).FirstOrDefault();
+            ingredient ??= RegisteredIngredients.Where(x => x.item == item.itemProperties).FirstOrDefault();
 
             if (ingredient == null) { return; }
 

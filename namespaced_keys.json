@@ -1,8 +1,8 @@
 {
   "SnowyCraftingCoreUnlockableItemKeys": {
     "__type": "DawnUnlockableItemInfo",
-    "ChemicalAnalyzer": "snowy_crafting_core:chemical_analyzer",
-    "ChemicalDistillery": "snowy_crafting_core:chemical_distillery",
+    "Alembic": "snowy_crafting_core:alembic",
+    "Analyzer": "snowy_crafting_core:analyzer",
     "ChemicalMixer": "snowy_crafting_core:chemical_mixer"
   }
 }

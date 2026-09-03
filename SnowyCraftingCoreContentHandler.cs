@@ -6,19 +6,19 @@ namespace SnowyCraftingCore
 {
     internal class SnowyCraftingCoreContentHandler : ContentHandler<SnowyCraftingCoreContentHandler>
     {
-        public class ChemicalAnalyzerAssets(DuskMod mod, string filePath) : AssetBundleLoader<ChemicalAnalyzerAssets>(mod, filePath) { }
-        public ChemicalAnalyzerAssets? ChemicalAnalyzer;
+        public class AnalyzerAssets(DuskMod mod, string filePath) : AssetBundleLoader<AnalyzerAssets>(mod, filePath) { }
+        public AnalyzerAssets? Analyzer;
 
-        public class ChemicalDistilleryAssets(DuskMod mod, string filePath) : AssetBundleLoader<ChemicalDistilleryAssets>(mod, filePath) { }
-        public ChemicalDistilleryAssets? ChemicalDistillery;
+        public class AlembicAssets(DuskMod mod, string filePath) : AssetBundleLoader<AlembicAssets>(mod, filePath) { }
+        public AlembicAssets? Alembic;
 
         public class ChemicalMixerAssets(DuskMod mod, string filePath) : AssetBundleLoader<ChemicalMixerAssets>(mod, filePath) { }
         public ChemicalMixerAssets? ChemicalMixer;
 
         public SnowyCraftingCoreContentHandler(DuskMod mod) : base(mod)
         {
-            RegisterContent("chemical_analyzer", out ChemicalAnalyzer);
-            RegisterContent("chemical_distillery", out ChemicalDistillery);
+            RegisterContent("analyzer", out Analyzer);
+            RegisterContent("alembic", out Alembic);
             RegisterContent("chemical_mixer", out ChemicalMixer);
         }
     }

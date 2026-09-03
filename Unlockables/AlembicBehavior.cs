@@ -11,9 +11,9 @@ using static SnowyCraftingCore.Plugin;
 
 namespace SnowyCraftingCore.Unlockables
 {
-    internal class ChemicalDistilleryBehavior : NetworkBehaviour
+    internal class AlembicBehavior : NetworkBehaviour
     {
-        public static List<DistilleryRecipe> registeredRecipies { get; internal set; } = [];
+        public static List<DistilleryRecipe> RegisteredRecipies { get; internal set; } = [];
 
         [SerializeField] InteractTrigger inputTrigger = null!;
 
@@ -91,7 +91,7 @@ namespace SnowyCraftingCore.Unlockables
                 despawningIngredientItem = _ingredient.DespawnItemAfterInput();
             }
 
-            ingredient ??= ChemicalMixerBehavior.registeredIngredients.Where(x => x.item == item.itemProperties).FirstOrDefault();
+            ingredient ??= ChemicalMixerBehavior.RegisteredIngredients.Where(x => x.item == item.itemProperties).FirstOrDefault();
 
             if (ingredient == null)
             {
@@ -102,7 +102,7 @@ namespace SnowyCraftingCore.Unlockables
             inputIngredient = ingredient;
             SetFlaskColor(outputFlask: false, ingredient.chemistryLiquidAppearance);
 
-            currentlyMixingRecipe = registeredRecipies.Where(x => x.ingredient == inputIngredient).FirstOrDefault();
+            currentlyMixingRecipe = RegisteredRecipies.Where(x => x.ingredient == inputIngredient).FirstOrDefault();
 
             if (localPlayer == item.playerHeldBy && despawningIngredientItem)
                 localPlayer.DespawnHeldObject();

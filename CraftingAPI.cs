@@ -7,26 +7,26 @@ namespace SnowyCraftingCore
     {
         public static void RegisterIngredient(ChemistryIngredient ingredient)
         {
-            if (ChemicalMixerBehavior.registeredIngredients.Contains(ingredient)) { logger.LogError($"Could not register chemistry ingredient {ingredient}, a similar chemistry ingredient already exists"); return; }
-            ChemicalMixerBehavior.registeredIngredients.Add(ingredient);
+            if (ChemicalMixerBehavior.RegisteredIngredients.Contains(ingredient)) { logger.LogError($"Could not register chemistry ingredient {ingredient}, a similar chemistry ingredient already exists"); return; }
+            ChemicalMixerBehavior.RegisteredIngredients.Add(ingredient);
         }
 
         public static void RegisterIngredient(AnalyzableIngredient ingredient)
         {
-            if (ChemicalAnalyzerBehavior.registeredIngredients.Contains(ingredient)) { logger.LogError($"Could not register analyzable ingredient {ingredient}, a similar analyzable ingredient already exists"); return; }
-            ChemicalAnalyzerBehavior.registeredIngredients.Add(ingredient);
+            if (AnalyzerBehavior.RegisteredIngredients.Contains(ingredient)) { logger.LogError($"Could not register analyzable ingredient {ingredient}, a similar analyzable ingredient already exists"); return; }
+            AnalyzerBehavior.RegisteredIngredients.Add(ingredient);
         }
 
         public static void RegisterRecipe(ChemistryRecipe recipe)
         {
-            if (ChemicalMixerBehavior.registeredRecipies.Contains(recipe)) { logger.LogError($"Could not register chemistry recipe {recipe}, a similar recipe already exists"); return; }
-            ChemicalMixerBehavior.registeredRecipies.Add(recipe);
+            if (ChemicalMixerBehavior.RegisteredRecipies.Contains(recipe)) { logger.LogError($"Could not register chemistry recipe {recipe}, a similar recipe already exists"); return; }
+            ChemicalMixerBehavior.RegisteredRecipies.Add(recipe);
         }
 
         public static void RegisterRecipe(DistilleryRecipe recipe)
         {
-            if (ChemicalDistilleryBehavior.registeredRecipies.Contains(recipe)) { logger.LogError($"Could not register distillery recipe {recipe}, a similar recipe already exists"); return; }
-            ChemicalDistilleryBehavior.registeredRecipies.Add(recipe);
+            if (AlembicBehavior.RegisteredRecipies.Contains(recipe)) { logger.LogError($"Could not register distillery recipe {recipe}, a similar recipe already exists"); return; }
+            AlembicBehavior.RegisteredRecipies.Add(recipe);
         }
     }
 }

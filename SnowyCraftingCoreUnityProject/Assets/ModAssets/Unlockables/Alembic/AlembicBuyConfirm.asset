@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0e80ae96b3eb9177eea5c8f9dadbcda1, type: 3}
-  m_Name: ChemicalDistilleryBuyConfirm
+  m_Name: AlembicBuyConfirm
   m_EditorClassIdentifier: 
-  displayText: Ordered the chemical distillery! Your new balance is [playerCredits].
+  displayText: Ordered the alembic! Your new balance is [playerCredits].
   terminalEvent: 
   clearPreviousText: 1
   maxCharactersToType: 35

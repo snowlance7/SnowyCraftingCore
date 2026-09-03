@@ -18,7 +18,7 @@ MonoBehaviour:
     _namespace: snowy_crafting_core
     _key: chemical_mixer
   <UnlockableItem>k__BackingField:
-    unlockableName: Chemical Mixer
+    unlockableName: Chemical_Mixer
     prefabObject: {fileID: 5296748171335639866, guid: 0a9b50b7a73684643bd30f75fa6a30dc,
       type: 3}
     unlockableType: 0

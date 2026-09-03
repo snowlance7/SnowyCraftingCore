@@ -13,8 +13,8 @@ namespace SnowyCraftingCore.Unlockables
 {
     internal class ChemicalMixerBehavior : NetworkBehaviour
     {
-        public static List<ChemistryIngredient> registeredIngredients { get; internal set; } = [];
-        public static List<ChemistryRecipe> registeredRecipies { get; internal set; } = [];
+        public static List<ChemistryIngredient> RegisteredIngredients { get; internal set; } = [];
+        public static List<ChemistryRecipe> RegisteredRecipies { get; internal set; } = [];
 
         [SerializeField] InteractTrigger input1Trigger = null!;
         [SerializeField] InteractTrigger input2Trigger = null!;
@@ -137,7 +137,7 @@ namespace SnowyCraftingCore.Unlockables
                 despawningIngredientItem = _ingredient.DespawnItemAfterInput();
             }
 
-            ingredient ??= registeredIngredients.Where(x => x.item == item.itemProperties).FirstOrDefault();
+            ingredient ??= RegisteredIngredients.Where(x => x.item == item.itemProperties).FirstOrDefault();
 
             if (ingredient == null)
             {
@@ -167,7 +167,7 @@ namespace SnowyCraftingCore.Unlockables
 
             if (input1Ingredient != null && input2Ingredient != null && outputIngredient == null) // Mixing
             {
-                currentlyMixingRecipe = registeredRecipies.Where(x => (x.ingredientA == input1Ingredient && x.ingredientB == input2Ingredient) || (x.ingredientA == input2Ingredient && x.ingredientB == input1Ingredient)).FirstOrDefault();
+                currentlyMixingRecipe = RegisteredRecipies.Where(x => (x.ingredientA == input1Ingredient && x.ingredientB == input2Ingredient) || (x.ingredientA == input2Ingredient && x.ingredientB == input1Ingredient)).FirstOrDefault();
 
                 mixing = true;
                 MixIngredients();

@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: SnowyCraftingCoreContentContainer
   m_EditorClassIdentifier: 
   assetBundles:
-  - assetBundleName: chemical_analyzer
-    configName: Chemical Analyzer
-  - assetBundleName: chemical_distillery
-    configName: Chemical Distillery
+  - assetBundleName: alembic
+    configName: Alembic
+  - assetBundleName: analyzer
+    configName: Analyzer
   - assetBundleName: chemical_mixer
     configName: Chemical Mixer
