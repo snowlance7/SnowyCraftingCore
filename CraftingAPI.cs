@@ -13,8 +13,8 @@ namespace SnowyCraftingCore
 
         public static void RegisterIngredient(AnalyzableIngredient ingredient)
         {
-            if (AnalyzerBehavior.RegisteredAnalyzableIngredients.Contains(ingredient)) { logger.LogError($"Could not register analyzable ingredient {ingredient}, a similar analyzable ingredient already exists"); return; }
-            AnalyzerBehavior.RegisteredAnalyzableIngredients.Add(ingredient);
+            if (AnalyzerBehavior.RegisteredIngredients.Contains(ingredient)) { logger.LogError($"Could not register analyzable ingredient {ingredient}, a similar analyzable ingredient already exists"); return; }
+            AnalyzerBehavior.RegisteredIngredients.Add(ingredient);
         }
 
         public static void RegisterRecipe(ChemistryRecipe recipe)

@@ -84,13 +84,21 @@ namespace SnowyCraftingCore.Unlockables
             if (!netRef.TryGet(out NetworkObject netObj)) { return; }
             if (!netObj.TryGetComponent(out GrabbableObject item)) { return; }
 
+            inputIngredient = null;
+            currentlyMixingRecipe = null;
+
             ChemistryIngredient? ingredient = null;
             bool despawningIngredientItem = true;
 
             if (item is IChemistryIngredient _ingredient)
             {
-                ingredient = _ingredient.GetInputIngredient();
-                despawningIngredientItem = _ingredient.DespawnItemAfterInput();
+                ingredient = _ingredient.GetIngredient();
+
+                if (ingredient != null && _ingredient is IDistillableIngredient distillableIngredient)
+                {
+                    currentlyMixingRecipe = new DistilleryFixedOutputReaction(ingredient, distillableIngredient.DistilleryOutput(), distillableIngredient.DistilleryMixTime());
+                    despawningIngredientItem = distillableIngredient.DespawnItemAfterDistilleryInput();
+                }
                 logger.LogDebug($"Got IChemistryIngredient: {ingredient?.ToString()}");
             }
 
@@ -106,8 +114,7 @@ namespace SnowyCraftingCore.Unlockables
             inputIngredient = ingredient;
             SetInputFlaskColor(ingredient.chemistryLiquidAppearance);
 
-            currentlyMixingRecipe = RegisteredRecipes.Where(x => x.ingredient.Equals(ingredient)).FirstOrDefault();
-            if (item is IDistillableIngredient distillableIngredient) { currentlyMixingRecipe = new DistilleryFixedOutputReaction(ingredient, distillableIngredient.GetDistilleryOutput(), distillableIngredient.GetDistilleryMixTime()); }
+            currentlyMixingRecipe ??= RegisteredRecipes.Where(x => x.ingredient.Equals(ingredient)).FirstOrDefault();
             logger.LogDebug(currentlyMixingRecipe != null ? "Recipe found" : "Recipe not found");
 
             if (localPlayer == item.playerHeldBy && despawningIngredientItem)
@@ -152,7 +159,7 @@ namespace SnowyCraftingCore.Unlockables
             if (!netObj.TryGetComponent(out GrabbableObject item)) { return; }
 
             if (item is IChemistryIngredient ingredient)
-                ingredient.OnOutputIngredient(specialInstructions);
+                ingredient.OnChemicalMixerOutput(specialInstructions);
 
             if (localPlayer.actualClientId == clientId)
                 localPlayer.GrabGrabbableObject(item);
@@ -181,6 +188,7 @@ namespace SnowyCraftingCore.Unlockables
                 }
 
                 SetInputFlaskColor(inputDefaultColor);
+                currentlyMixingRecipe = null;
                 inputIngredient = null;
                 mixing = false;
             }

@@ -10507,7 +10507,7 @@ MonoBehaviour:
   hoverIcon: {fileID: 21300000, guid: 540d63f6f0bcc844a945fa9318866abb, type: 3}
   hoverTip: Add Ingredient [E]
   disabledHoverIcon: {fileID: 0}
-  disabledHoverTip: 
+  disabledHoverTip: Requires distillable item
   interactable: 1
   oneHandedItemAllowed: 1
   twoHandedItemAllowed: 0

@@ -130,8 +130,10 @@ namespace SnowyCraftingCore.Unlockables
 
             if (item is IChemistryIngredient _ingredient)
             {
-                ingredient = _ingredient.GetInputIngredient();
-                despawningIngredientItem = _ingredient.DespawnItemAfterInput();
+                ingredient = _ingredient.GetIngredient();
+
+                if (_ingredient is IMixableIngredient _mixableIngredient)
+                    despawningIngredientItem = _mixableIngredient.DespawnItemAfterInput();
             }
 
             ingredient ??= RegisteredIngredients.Where(x => x.item == item.itemProperties).FirstOrDefault();
@@ -202,7 +204,7 @@ namespace SnowyCraftingCore.Unlockables
             if (!netObj.TryGetComponent(out GrabbableObject item)) { return; }
 
             if (item is IChemistryIngredient ingredient)
-                ingredient.OnOutputIngredient(specialInstructions);
+                ingredient.OnChemicalMixerOutput(specialInstructions);
 
             if (localPlayer.actualClientId == clientId)
                 localPlayer.GrabGrabbableObject(item);
@@ -232,6 +234,7 @@ namespace SnowyCraftingCore.Unlockables
                     Landmine.SpawnExplosion(explosionPosition.position, true, killRange: 0, nonLethalDamage: 5, physicsForce: 5f);
                 }
 
+                currentlyMixingRecipe = null;
                 input1ParticleSystem.Stop();
                 input2ParticleSystem.Stop();
                 outputParticleSystem.Play();

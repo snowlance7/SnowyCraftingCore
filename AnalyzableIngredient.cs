@@ -5,9 +5,9 @@ using System.Text;
 
 namespace SnowyCraftingCore
 {
-    public class AnalyzableIngredient(Item item, Action<ChemistryIngredient> result, ChemistryLiquidAppearance? chemistryLiquidAppearance = null, string specialInstructions = "") : ChemistryIngredient(item, chemistryLiquidAppearance, specialInstructions), IEquatable<AnalyzableIngredient>
+    public class AnalyzableIngredient(Item item, Action<AnalyzableIngredient> result, ChemistryLiquidAppearance? chemistryLiquidAppearance = null, string specialInstructions = "") : ChemistryIngredient(item, chemistryLiquidAppearance, specialInstructions), IEquatable<AnalyzableIngredient>
     {
-        public Action<ChemistryIngredient> result = result;
+        public Action<AnalyzableIngredient> result = result;
 
         public bool Equals(AnalyzableIngredient other)
         {

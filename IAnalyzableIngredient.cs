@@ -4,9 +4,9 @@ using System.Text;
 
 namespace SnowyCraftingCore
 {
-    public interface IAnalyzableIngredient
+    public interface IAnalyzableIngredient : IChemistryIngredient
     {
-        public AnalyzableIngredient? GetAnalyzableIngredient();
+        public Action<AnalyzableIngredient> OnAnalyze();
         public bool DespawnItemAfterAnalyzing();
     }
 }

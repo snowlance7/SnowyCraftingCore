@@ -4,9 +4,10 @@ using System.Text;
 
 namespace SnowyCraftingCore
 {
-    public interface IDistillableIngredient
+    public interface IDistillableIngredient : IChemistryIngredient
     {
-        public ChemistryIngredient? GetDistilleryOutput();
-        public float GetDistilleryMixTime();
+        public ChemistryIngredient? DistilleryOutput();
+        public float DistilleryMixTime();
+        public bool DespawnItemAfterDistilleryInput();
     }
 }

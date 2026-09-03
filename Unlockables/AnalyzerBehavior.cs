@@ -10,7 +10,7 @@ namespace SnowyCraftingCore.Unlockables
 {
     internal class AnalyzerBehavior : NetworkBehaviour
     {
-        public static List<AnalyzableIngredient> RegisteredAnalyzableIngredients { get; internal set; } = [];
+        public static List<AnalyzableIngredient> RegisteredIngredients { get; internal set; } = [];
 
         [SerializeField] Animator animator = null!;
         [SerializeField] AudioSource audioSource = null!;
@@ -39,7 +39,7 @@ namespace SnowyCraftingCore.Unlockables
         public void OnTriggerInteract() // Interact trigger
         {
             var obj = localPlayer.currentlyHeldObjectServer;
-            if (inAnimation || obj == null || (obj is not IAnalyzableIngredient && !RegisteredAnalyzableIngredients.Any(x => x.item == obj.itemProperties))) { return; }
+            if (inAnimation || obj == null || (obj is not IAnalyzableIngredient && !RegisteredIngredients.Any(x => x.item == obj.itemProperties))) { return; }
             ProcessIngredientRpc(obj.NetworkObject);
         }
 
@@ -62,11 +62,13 @@ namespace SnowyCraftingCore.Unlockables
 
             if (item is IAnalyzableIngredient _ingredient)
             {
-                ingredient = _ingredient.GetAnalyzableIngredient();
+                ChemistryIngredient? chemistryIngredient = _ingredient.GetIngredient();
+                chemistryIngredient ??= new ChemistryIngredient(item.itemProperties);
+                ingredient = new AnalyzableIngredient(item.itemProperties, _ingredient.OnAnalyze(), chemistryIngredient.chemistryLiquidAppearance, chemistryIngredient.specialInstructions);
                 despawningIngredientItem = _ingredient.DespawnItemAfterAnalyzing();
             }
 
-            ingredient ??= RegisteredAnalyzableIngredients.Where(x => x.item == item.itemProperties).FirstOrDefault();
+            ingredient ??= RegisteredIngredients.Where(x => x.item == item.itemProperties).FirstOrDefault();
 
             if (ingredient == null) { return; }
 
