@@ -9,5 +9,10 @@ namespace SnowyCraftingCore
     {
         public Color liquidColor = liquidColor;
         public float emissionIntensity = emissionIntensity;
+
+        public override string ToString()
+        {
+            return $"Color: {liquidColor.ToString()}, EmissionIntensity: {emissionIntensity}";
+        }
     }
 }

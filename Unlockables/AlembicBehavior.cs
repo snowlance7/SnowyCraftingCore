@@ -165,7 +165,7 @@ namespace SnowyCraftingCore.Unlockables
             if (!netObj.TryGetComponent(out GrabbableObject item)) { return; }
 
             if (item is IChemistryIngredient ingredient)
-                ingredient.OnChemicalMixerOutput(specialInstructions);
+                ingredient.OnChemicalOutput(specialInstructions);
 
             if (localPlayer.actualClientId == clientId)
                 localPlayer.GrabGrabbableObject(item);
