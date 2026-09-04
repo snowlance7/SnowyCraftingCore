@@ -1,6 +1,6 @@
 {
   "name": "SnowyCraftingCore",
-  "version_number": "1.0.0",
+  "version_number": "1.0.1",
   "website_url": "https://github.com/snowlance7/SnowyCraftingCore",
   "description": "Personal crafting module for my mods",
   "dependencies": [

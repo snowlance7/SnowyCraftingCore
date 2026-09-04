@@ -1,6 +1,8 @@
+I may make a wiki for this mod eventually if people want it
+
 ## Contact
 
-For issues and suggestions visit the [github](https://github.com/snowlance7/LethalDiseases) page.
+For issues and suggestions visit the [github](https://github.com/snowlance7/SnowyCraftingCore) page.
 
 ## For collaboration or commissions
 
