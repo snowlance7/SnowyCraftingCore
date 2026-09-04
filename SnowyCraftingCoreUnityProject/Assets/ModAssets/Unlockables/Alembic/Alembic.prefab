@@ -216,6 +216,7 @@ MonoBehaviour:
   inputParticleSystem: {fileID: 6540181594181110023}
   outputParticleSystem: {fileID: 8277208482258728097}
   audioSource: {fileID: 1708114950328161967}
+  itemInputPosition: {fileID: 5503651546849940449}
 --- !u!1 &525251655842614982
 GameObject:
   m_ObjectHideFlags: 0
@@ -10816,7 +10817,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8781337227705986572}
-  m_Mesh: {fileID: 4763908009471547883, guid: 2131c883e1c30ef4896ce5d38fdec299, type: 3}
+  m_Mesh: {fileID: 5767618122518251911, guid: 2131c883e1c30ef4896ce5d38fdec299, type: 3}
 --- !u!23 &7476156560756205123
 MeshRenderer:
   m_ObjectHideFlags: 0

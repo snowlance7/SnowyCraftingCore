@@ -32,6 +32,8 @@ namespace SnowyCraftingCore.Unlockables
 
         DistilleryRecipe? currentlyMixingRecipe;
 
+        ParticleSystemRenderer inputParticleSystemRenderer = null!;
+
         bool mixing;
         ChemistryLiquidAppearance inputDefaultColor = null!;
         const float defaultMixingTime = 10f;
@@ -39,6 +41,7 @@ namespace SnowyCraftingCore.Unlockables
         public void Awake()
         {
             inputDefaultColor = new ChemistryLiquidAppearance(inputRenderer.material.color, 2f);
+            inputParticleSystemRenderer = inputParticleSystem.GetComponent<ParticleSystemRenderer>();
         }
 
         public void Update()
@@ -63,12 +66,14 @@ namespace SnowyCraftingCore.Unlockables
 
         private void SetInputFlaskColor(ChemistryLiquidAppearance color)
         {
-            inputRenderer.enabled = true;
-            inputRenderer.sharedMaterial.color = color.liquidColor;
-            inputRenderer.sharedMaterial.SetColor("_EmissionColor", color.liquidColor);
-            inputRenderer.sharedMaterial.SetFloat("_EmissionIntensity", color.emissionIntensity);
-            inputParticleSystem.Stop();
-            inputParticleSystem.Play();
+            //inputRenderer.enabled = true;
+            inputRenderer.material.color = color.liquidColor;
+            inputRenderer.material.SetColor("_EmissionColor", color.liquidColor);
+            inputRenderer.material.SetFloat("_EmissionIntensity", color.emissionIntensity);
+            inputParticleSystemRenderer.material.color = color.liquidColor;
+            inputParticleSystemRenderer.material.SetColor("_EmissionColor", color.liquidColor);
+            inputParticleSystemRenderer.material.SetFloat("_EmissionIntensity", color.emissionIntensity);
+
         }
 
         private void SetOutputFlaskColor(ChemistryLiquidAppearance color)
