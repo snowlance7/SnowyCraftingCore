@@ -1,11 +1,9 @@
 ﻿using Dawn;
 using GameNetcodeStuff;
 using SnowyLib;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
 using Unity.Netcode;
 using UnityEngine;
 using static SnowyCraftingCore.Plugin;
@@ -24,6 +22,7 @@ namespace SnowyCraftingCore.Unlockables
         [SerializeField] MeshRenderer inputRenderer = null!;
         [SerializeField] MeshRenderer outputRenderer = null!;
 
+        [SerializeField] ParticleSystem inputParticleSystem = null!;
         [SerializeField] ParticleSystem outputParticleSystem = null!;
 
         [SerializeField] AudioSource audioSource = null!;
@@ -65,17 +64,19 @@ namespace SnowyCraftingCore.Unlockables
         private void SetInputFlaskColor(ChemistryLiquidAppearance color)
         {
             inputRenderer.enabled = true;
-            inputRenderer.material.color = color.liquidColor;
-            inputRenderer.material.SetColor("_EmissionColor", color.liquidColor);
-            inputRenderer.material.SetFloat("_EmissionIntensity", color.emissionIntensity);
+            inputRenderer.sharedMaterial.color = color.liquidColor;
+            inputRenderer.sharedMaterial.SetColor("_EmissionColor", color.liquidColor);
+            inputRenderer.sharedMaterial.SetFloat("_EmissionIntensity", color.emissionIntensity);
+            inputParticleSystem.Stop();
+            inputParticleSystem.Play();
         }
 
         private void SetOutputFlaskColor(ChemistryLiquidAppearance color)
         {
             outputRenderer.enabled = true;
-            outputRenderer.material.color = color.liquidColor;
-            outputRenderer.material.SetColor("_EmissionColor", color.liquidColor);
-            outputRenderer.material.SetFloat("_EmissionIntensity", color.emissionIntensity);
+            outputRenderer.sharedMaterial.color = color.liquidColor;
+            outputRenderer.sharedMaterial.SetColor("_EmissionColor", color.liquidColor);
+            outputRenderer.sharedMaterial.SetFloat("_EmissionIntensity", color.emissionIntensity);
         }
 
         [Rpc(SendTo.Everyone)]
@@ -137,13 +138,13 @@ namespace SnowyCraftingCore.Unlockables
                 GrabbableObject? outputItem = Utils.SpawnItem(outputIngredient!.item.GetDawnInfo().TypedKey, player.transform.position);
                 if (outputItem != null)
                 {
-                    IEnumerator sendSpawnOutputIngredient()
+                    IEnumerator sendSpawnOutputIngredient(string specialInstructions)
                     {
                         yield return new WaitUntil(() => outputItem.NetworkObject != null && outputItem.NetworkObject.IsSpawned);
-                        SpawnOutputIngredientRpc(clientId, outputItem.NetworkObject, outputIngredient.specialInstructions);
+                        SpawnOutputIngredientRpc(clientId, outputItem.NetworkObject, specialInstructions);
                     }
 
-                    StartCoroutine(sendSpawnOutputIngredient());
+                    StartCoroutine(sendSpawnOutputIngredient(outputIngredient.specialInstructions));
                 }
             }
 

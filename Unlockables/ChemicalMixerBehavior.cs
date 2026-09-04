@@ -1,7 +1,6 @@
 ﻿using Dawn;
 using GameNetcodeStuff;
 using SnowyLib;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -98,25 +97,25 @@ namespace SnowyCraftingCore.Unlockables
         private void SetInput1FlaskColor(ChemistryLiquidAppearance color)
         {
             input1Renderer.enabled = true;
-            input1Renderer.material.color = color.liquidColor;
-            input1Renderer.material.SetColor("_EmissionColor", color.liquidColor);
-            input1Renderer.material.SetFloat("_EmissionIntensity", color.emissionIntensity);
+            input1Renderer.sharedMaterial.color = color.liquidColor;
+            input1Renderer.sharedMaterial.SetColor("_EmissionColor", color.liquidColor);
+            input1Renderer.sharedMaterial.SetFloat("_EmissionIntensity", color.emissionIntensity);
         }
 
         private void SetInput2FlaskColor(ChemistryLiquidAppearance color)
         {
             input2Renderer.enabled = true;
-            input2Renderer.material.color = color.liquidColor;
-            input2Renderer.material.SetColor("_EmissionColor", color.liquidColor);
-            input2Renderer.material.SetFloat("_EmissionIntensity", color.emissionIntensity);
+            input2Renderer.sharedMaterial.color = color.liquidColor;
+            input2Renderer.sharedMaterial.SetColor("_EmissionColor", color.liquidColor);
+            input2Renderer.sharedMaterial.SetFloat("_EmissionIntensity", color.emissionIntensity);
         }
 
         private void SetOutputFlaskColor(ChemistryLiquidAppearance color)
         {
             outputRenderer.enabled = true;
-            outputRenderer.material.color = color.liquidColor;
-            outputRenderer.material.SetColor("_EmissionColor", color.liquidColor);
-            outputRenderer.material.SetFloat("_EmissionIntensity", color.emissionIntensity);
+            outputRenderer.sharedMaterial.color = color.liquidColor;
+            outputRenderer.sharedMaterial.SetColor("_EmissionColor", color.liquidColor);
+            outputRenderer.sharedMaterial.SetFloat("_EmissionIntensity", color.emissionIntensity);
         }
 
         [Rpc(SendTo.Everyone)]
@@ -166,7 +165,7 @@ namespace SnowyCraftingCore.Unlockables
 
             if (input1Ingredient != null && input2Ingredient != null && outputIngredient == null) // Mixing
             {
-                currentlyMixingRecipe = RegisteredRecipes.Where(x => (x.ingredientA == input1Ingredient && x.ingredientB == input2Ingredient) || (x.ingredientA == input2Ingredient && x.ingredientB == input1Ingredient)).FirstOrDefault();
+                currentlyMixingRecipe = RegisteredRecipes.Where(x => (x.ingredientA.Equals(input1Ingredient) && x.ingredientB.Equals(input2Ingredient)) || (x.ingredientA.Equals(input2Ingredient) && x.ingredientB.Equals(input1Ingredient))).FirstOrDefault();
 
                 mixing = true;
                 MixIngredients();
@@ -181,13 +180,13 @@ namespace SnowyCraftingCore.Unlockables
                     GrabbableObject? outputItem = Utils.SpawnItem(outputIngredient!.item.GetDawnInfo().TypedKey, player.transform.position);
                     if (outputItem != null)
                     {
-                        IEnumerator sendSpawnOutputIngredient()
+                        IEnumerator sendSpawnOutputIngredient(string specialInstructions)
                         {
                             yield return new WaitUntil(() => outputItem.NetworkObject != null && outputItem.NetworkObject.IsSpawned);
-                            SpawnOutputIngredientRpc(clientId, outputItem.NetworkObject, outputIngredient.specialInstructions);
+                            SpawnOutputIngredientRpc(clientId, outputItem.NetworkObject, specialInstructions);
                         }
 
-                        StartCoroutine(sendSpawnOutputIngredient());
+                        StartCoroutine(sendSpawnOutputIngredient(outputIngredient.specialInstructions));
                     }
                 }
 
@@ -228,6 +227,7 @@ namespace SnowyCraftingCore.Unlockables
                 {
                     outputIngredient = currentlyMixingRecipe.reaction.Invoke(input1Ingredient!, input2Ingredient!);
                     SetOutputFlaskColor(outputIngredient.chemistryLiquidAppearance);
+                    outputParticleSystem.Play();
                 }
                 else
                 {
@@ -237,7 +237,6 @@ namespace SnowyCraftingCore.Unlockables
                 currentlyMixingRecipe = null;
                 input1ParticleSystem.Stop();
                 input2ParticleSystem.Stop();
-                outputParticleSystem.Play();
                 input1Ingredient = null;
                 input2Ingredient = null;
                 input1Renderer.enabled = false;

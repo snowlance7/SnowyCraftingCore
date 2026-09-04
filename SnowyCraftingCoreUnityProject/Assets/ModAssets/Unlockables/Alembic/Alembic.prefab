@@ -54,7 +54,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 24300008, guid: 64b08a5192e203847bb952b79319ef18,
     type: 2}
-  m_audioClip: {fileID: 8300000, guid: be2ed8b28298d1641b4f771d1c92b77e, type: 3}
+  m_audioClip: {fileID: 8300000, guid: d24a11b65d4e0464582247a1f19222e3, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
@@ -5002,7 +5002,7 @@ ParticleSystemRenderer:
   m_RenderingLayerMask: 257
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: d83af06b61a1b7e498c1899ae5ed50de, type: 2}
+  - {fileID: 2100000, guid: 7ff7ea338c2a323438ca794f26656eda, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Unity.Netcode;
 using UnityEngine;
 using static SnowyCraftingCore.Plugin;
@@ -34,6 +32,7 @@ namespace SnowyCraftingCore.Unlockables
             var ingredient = analyzingIngredient;
             analyzingIngredient = null;
             ingredient?.result.Invoke(ingredient);
+            audioSource.Stop();
         }
 
         public void OnTriggerInteract() // Interact trigger
