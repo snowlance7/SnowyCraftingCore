@@ -19,3 +19,5 @@ MonoBehaviour:
     configName: Analyzer
   - assetBundleName: chemical_mixer
     configName: Chemical Mixer
+  - assetBundleName: snowycraftingcore_assets
+    configName: Other

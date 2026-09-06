@@ -46,7 +46,7 @@ namespace SnowyCraftingCore.Unlockables
 
         public void Update()
         {
-            inputTriggerCollider.enabled = inputIngredient == null && localPlayer.currentlyHeldObjectServer != null;
+            inputTriggerCollider.enabled = inputIngredient == null && outputIngredient == null && localPlayer.currentlyHeldObjectServer != null;
             inputTrigger.interactable = localPlayer.currentlyHeldObjectServer != null && !localPlayer.currentlyHeldObjectServer.itemProperties.twoHanded;
 
             outputTriggerCollider.enabled = outputIngredient != null;

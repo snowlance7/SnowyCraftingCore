@@ -771,7 +771,8 @@ MonoBehaviour:
   audioSource: {fileID: 9868393331260798}
   interactTrigger: {fileID: 8255662524429107073}
   interactTriggerCollider: {fileID: 4216332362108364933}
-  testTubeRenderer: {fileID: 4668609176708642690}
+  testTubeRenderer: {fileID: 3790619744387862902}
+  testTubeFluidRenderer: {fileID: 4668609176708642690}
 --- !u!1 &5447559565286948614
 GameObject:
   m_ObjectHideFlags: 0

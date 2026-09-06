@@ -1,4 +1,5 @@
 using HarmonyLib;
+using SnowyCraftingCore.TerminalAdditions;
 using SnowyLib;
 
 /* bodyparts
@@ -19,6 +20,8 @@ namespace SnowyCraftingCore
     [HarmonyPatch]
     internal static class TESTING
     {
+        static bool open = false;
+
         [HarmonyPostfix, HarmonyPatch(typeof(HUDManager), nameof(HUDManager.PingScan_performed))]
         public static void PingScan_performedPostFix()
         {
@@ -45,6 +48,10 @@ namespace SnowyCraftingCore
                 {
                     case "/recipes":
                         CraftingAPI.LogRecipies();
+                        break;
+                    case "/open":
+                        open = !open;
+                        SmallItemDispenser.Instance.animator.SetBool("open", open);
                         break;
                     default:
                         break;
