@@ -17,7 +17,9 @@ MonoBehaviour:
     configName: Alembic
   - assetBundleName: analyzer
     configName: Analyzer
+  - assetBundleName: apparatus_power_port
+    configName: Apparatus Power Port
   - assetBundleName: chemical_mixer
     configName: Chemical Mixer
-  - assetBundleName: snowycraftingcore_assets
-    configName: Other
+  - assetBundleName: small_item_dispenser
+    configName: Small Item Dispenser

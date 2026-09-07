@@ -17,7 +17,7 @@ namespace SnowyCraftingCore
     [BepInDependency(SnowyLib.MyPluginInfo.PLUGIN_GUID)]
     internal class Plugin : BaseUnityPlugin
     {
-        public static Plugin Instance { get; private set; } = null!;
+        public static Plugin PluginInstance { get; private set; } = null!;
         public static ManualLogSource logger { get; private set; } = null!;
         public static DuskMod Mod { get; private set; } = null!;
 
@@ -28,9 +28,9 @@ namespace SnowyCraftingCore
 
         private void Awake()
         {
-            if (Instance == null) Instance = this;
+            if (PluginInstance == null) PluginInstance = this;
 
-            logger = Instance.Logger;
+            logger = PluginInstance.Logger;
 
             harmony.PatchAll();
 

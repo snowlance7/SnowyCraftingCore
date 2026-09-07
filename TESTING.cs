@@ -49,10 +49,6 @@ namespace SnowyCraftingCore
                     case "/recipes":
                         CraftingAPI.LogRecipies();
                         break;
-                    case "/open":
-                        open = !open;
-                        SmallItemDispenser.Instance.animator.SetBool("open", open);
-                        break;
                     default:
                         break;
                 }

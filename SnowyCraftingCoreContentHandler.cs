@@ -6,15 +6,20 @@ namespace SnowyCraftingCore
 {
     internal class SnowyCraftingCoreContentHandler : ContentHandler<SnowyCraftingCoreContentHandler>
     {
-        public class SnowyCraftingCoreAssetsAssets(DuskMod mod, string filePath) : AssetBundleLoader<SnowyCraftingCoreAssetsAssets>(mod, filePath)
+        public class SmallItemDispenserAssets(DuskMod mod, string filePath) : AssetBundleLoader<SmallItemDispenserAssets>(mod, filePath)
         {
             [LoadFromBundle("SmallItemDispenser.prefab")]
             public GameObject SmallItemDispenserPrefab { get; private set; } = null!;
-
-            [LoadFromBundle("ApparatusSlot.prefab")]
-            public GameObject ApparatusSlotPrefab { get; private set; } = null!;
         }
-        public SnowyCraftingCoreAssetsAssets? SnowyCraftingCoreAssets;
+        public SmallItemDispenserAssets? SmallItemDispenser;
+
+        public class ApparatusPowerPortAssets(DuskMod mod, string filePath) : AssetBundleLoader<ApparatusPowerPortAssets>(mod, filePath)
+        {
+
+            [LoadFromBundle("ApparatusPowerPort.prefab")]
+            public GameObject ApparatusPowerPortPrefab { get; private set; } = null!;
+        }
+        public ApparatusPowerPortAssets? ApparatusPowerPort;
 
         public class AnalyzerAssets(DuskMod mod, string filePath) : AssetBundleLoader<AnalyzerAssets>(mod, filePath) { }
         public AnalyzerAssets? Analyzer;
@@ -27,7 +32,8 @@ namespace SnowyCraftingCore
 
         public SnowyCraftingCoreContentHandler(DuskMod mod) : base(mod)
         {
-            RegisterContent("snowycraftingcore_assets", out SnowyCraftingCoreAssets);
+            RegisterContent("apparatus_power_port", out ApparatusPowerPort);
+            RegisterContent("small_item_dispenser", out SmallItemDispenser);
             RegisterContent("analyzer", out Analyzer);
             RegisterContent("alembic", out Alembic);
             RegisterContent("chemical_mixer", out ChemicalMixer);
