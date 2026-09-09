@@ -7,7 +7,7 @@ using static SnowyCraftingCore.Plugin;
 
 namespace SnowyCraftingCore.TerminalAdditions
 {
-    internal class ApparatusPowerPort : NetworkBehaviour
+    public class ApparatusPowerPort : NetworkBehaviour
     {
         public static ApparatusPowerPort? Instance { get; private set; } = null!;
         private static Terminal terminal = null!;
@@ -51,7 +51,7 @@ namespace SnowyCraftingCore.TerminalAdditions
             TerminalCommandBasicInformation eventDrivenCommandBasicInformation = new TerminalCommandBasicInformation("ToggleApparatusPort", "Other", "Opens/closes the apparatus port in the terminal", ClearText.Result | ClearText.Query);
             DawnLib.DefineTerminalCommand(NamespacedKey<DawnTerminalCommandInfo>.From("snowy_crafting_core", "toggle_apparatus_port"), eventDrivenCommandBasicInformation, builder =>
             {
-                builder.SetKeywords(["apparatus port", "power port"]);
+                builder.SetKeywords(["apparatus", "powerport"]);
                 builder.DefineEventDrivenCommand(eventDrivenCommandBuilder =>
                 {
                     eventDrivenCommandBuilder.SetResultNodeDisplayText(() =>
@@ -102,7 +102,10 @@ namespace SnowyCraftingCore.TerminalAdditions
             base.transform.position += _positionOffset;
 
             if (apparatusInSlot != null)
+            {
                 apparatusInSlot.transform.position = apparatusPosition.position;
+                apparatusInSlot.transform.rotation = apparatusPosition.rotation;
+            }
         }
 
         private void OpenPort(bool open)
@@ -124,8 +127,11 @@ namespace SnowyCraftingCore.TerminalAdditions
 
                 if (open)
                 {
-                    audioSource.loop = true;
-                    audioSource.Play();
+                    if (((ILungPropInterface)apparatusInSlot).PowerRemaining > 0f)
+                    {
+                        audioSource.loop = true;
+                        audioSource.Play();
+                    }
                 }
                 else
                 {
