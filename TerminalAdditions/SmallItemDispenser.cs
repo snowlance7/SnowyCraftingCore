@@ -82,7 +82,7 @@ namespace SnowyCraftingCore.TerminalAdditions
             SetItemInSlotRpc(insertingItem.NetworkObject);
         }
 
-        private void OpenItemChute(bool open)
+        private void OpenPort(bool open)
         {
             animator.SetBool("open", open);
 
@@ -98,7 +98,7 @@ namespace SnowyCraftingCore.TerminalAdditions
             {
                 yield return null;
 
-                OpenItemChute(true);
+                OpenPort(true);
                 yield return new WaitForSeconds(1f);
 
                 AwaitingItem = inputItem;
@@ -112,7 +112,7 @@ namespace SnowyCraftingCore.TerminalAdditions
 
                 AwaitingItem = null;
 
-                OpenItemChute(false);
+                OpenPort(false);
 
                 elapsedTime = 0f;
                 while (elapsedTime < 1f)
@@ -137,7 +137,7 @@ namespace SnowyCraftingCore.TerminalAdditions
                 audioSource.Stop();
                 operation.Invoke(ItemInSlot);
 
-                OpenItemChute(true);
+                OpenPort(true);
                 yield return new WaitForSeconds(1f);
 
                 elapsedTime = 0f;
@@ -150,7 +150,7 @@ namespace SnowyCraftingCore.TerminalAdditions
                 if (ItemInSlot.playerHeldBy != null || ItemInSlot.isHeldByEnemy)
                     ItemInSlot = null;
 
-                OpenItemChute(false);
+                OpenPort(false);
                 yield return new WaitForSeconds(1f);
 
                 if (ItemInSlot != null && IsServer)
@@ -171,7 +171,7 @@ namespace SnowyCraftingCore.TerminalAdditions
                 yield return null;
 
                 // Open chute
-                OpenItemChute(true);
+                OpenPort(true);
                 yield return new WaitForSeconds(1f);
 
                 AwaitingItem = inputItem;
@@ -184,7 +184,7 @@ namespace SnowyCraftingCore.TerminalAdditions
                 }
                 AwaitingItem = null;
 
-                OpenItemChute(false);
+                OpenPort(false);
 
                 elapsedTime = 0f;
                 while (elapsedTime < 1f)
@@ -241,7 +241,7 @@ namespace SnowyCraftingCore.TerminalAdditions
                     yield break;
                 }
 
-                OpenItemChute(true);
+                OpenPort(true);
                 yield return new WaitForSeconds(1f);
 
                 elapsedTime = 0f;
@@ -254,7 +254,7 @@ namespace SnowyCraftingCore.TerminalAdditions
                 if (ItemInSlot.playerHeldBy != null || ItemInSlot.isHeldByEnemy)
                     ItemInSlot = null;
 
-                OpenItemChute(false);
+                OpenPort(false);
                 yield return new WaitForSeconds(1f);
 
                 if (ItemInSlot != null && IsServer)
@@ -303,7 +303,7 @@ namespace SnowyCraftingCore.TerminalAdditions
                     yield break;
                 }
 
-                OpenItemChute(true);
+                OpenPort(true);
                 yield return new WaitForSeconds(1f);
 
                 elapsedTime = 0f;
@@ -316,7 +316,7 @@ namespace SnowyCraftingCore.TerminalAdditions
                 if (ItemInSlot.playerHeldBy != null || ItemInSlot.isHeldByEnemy)
                     ItemInSlot = null;
 
-                OpenItemChute(false);
+                OpenPort(false);
                 yield return new WaitForSeconds(1f);
 
                 if (ItemInSlot != null && IsServer)

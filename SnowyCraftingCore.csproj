@@ -67,6 +67,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Reference Include="MonkeyInjectionLibrary">
+        <HintPath>..\..\..\..\AppData\Roaming\com.kesomannen.gale\lethal-company\profiles\Testing\BepInEx\patchers\mattymatty-MonkeyInjectionLibrary\MonkeyInjectionLibrary.dll</HintPath>
+      </Reference>
       <Reference Include="Snowlance.SnowyLib">
         <HintPath>..\SnowyLib\bin\Debug\netstandard2.1\Snowlance.SnowyLib.dll</HintPath>
       </Reference>
