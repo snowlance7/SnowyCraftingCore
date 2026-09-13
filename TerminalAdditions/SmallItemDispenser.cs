@@ -2,6 +2,7 @@
 using SnowyLib;
 using System;
 using System.Collections;
+using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
 using static SnowyCraftingCore.Plugin;
@@ -25,9 +26,9 @@ namespace SnowyCraftingCore.TerminalAdditions
 
         public bool IsBeingUsed => routine != null;
 
-        public bool AwaitingItemPlacement => AwaitingItem != null;
+        public bool AwaitingItemPlacement => AwaitingItems.Length > 0;
 
-        public Item? AwaitingItem { get; private set; }
+        public Item[] AwaitingItems { get; private set; } = [];
 
         public GrabbableObject? ItemInSlot { get; private set; }
 
@@ -58,7 +59,7 @@ namespace SnowyCraftingCore.TerminalAdditions
         private void Update()
         {
             interactTriggerCollider.enabled = AwaitingItemPlacement;
-            interactTrigger.interactable = localPlayer.currentlyHeldObjectServer != null && localPlayer.currentlyHeldObjectServer.itemProperties == AwaitingItem;
+            interactTrigger.interactable = localPlayer.currentlyHeldObjectServer != null && AwaitingItems.Contains(localPlayer.currentlyHeldObjectServer.itemProperties);
         }
 
         private void LateUpdate()
@@ -82,7 +83,7 @@ namespace SnowyCraftingCore.TerminalAdditions
 
         public void OnInteract()
         {
-            if (AwaitingItem == null || localPlayer.currentlyHeldObjectServer == null || localPlayer.currentlyHeldObjectServer.itemProperties != AwaitingItem || localPlayer.isGrabbingObjectAnimation) { return; }
+            if (AwaitingItems.Length == 0 || localPlayer.currentlyHeldObjectServer == null || !AwaitingItems.Contains(localPlayer.currentlyHeldObjectServer.itemProperties) || localPlayer.isGrabbingObjectAnimation) { return; }
             GrabbableObject insertingItem = localPlayer.currentlyHeldObjectServer;
             localPlayer.DiscardHeldObject(true, NetworkObject, NetworkObject.transform.InverseTransformPoint(itemPosition.position), false);
             SetItemInSlotRpc(insertingItem.NetworkObject);
@@ -100,6 +101,11 @@ namespace SnowyCraftingCore.TerminalAdditions
 
         public void ItemModificationOperation(Item inputItem, Action<GrabbableObject> operation, float inputTime, float operationTime, float outputTime)
         {
+            ItemModificationOperation([inputItem], operation, inputTime, operationTime, outputTime);
+        }
+
+        public void ItemModificationOperation(Item[] inputItems, Action<GrabbableObject> operation, float inputTime, float operationTime, float outputTime)
+        {
             IEnumerator itemModificationOperation()
             {
                 yield return null;
@@ -107,7 +113,7 @@ namespace SnowyCraftingCore.TerminalAdditions
                 OpenPort(true);
                 yield return new WaitForSeconds(1f);
 
-                AwaitingItem = inputItem;
+                AwaitingItems = inputItems;
 
                 float elapsedTime = 0f;
                 while (elapsedTime < inputTime && ItemInSlot == null)
@@ -116,7 +122,7 @@ namespace SnowyCraftingCore.TerminalAdditions
                     elapsedTime += Time.deltaTime;
                 }
 
-                AwaitingItem = null;
+                AwaitingItems = [];
 
                 OpenPort(false);
 
@@ -132,7 +138,7 @@ namespace SnowyCraftingCore.TerminalAdditions
 
                 if (ItemInSlot == null)
                 {
-                    AwaitingItem = null;
+                    AwaitingItems = [];
                     logger.LogError("Operation failed, no item was inserted into the item slot");
                     routine = null;
                     yield break;
@@ -172,6 +178,11 @@ namespace SnowyCraftingCore.TerminalAdditions
 
         public void ItemExchangeOperation(Item inputItem, Item outputItem, float inputTime, float operationTime, float outputTime)
         {
+            ItemExchangeOperation([inputItem], outputItem, inputTime, operationTime, outputTime);
+        }
+
+        public void ItemExchangeOperation(Item[] inputItems, Item outputItem, float inputTime, float operationTime, float outputTime)
+        {
             IEnumerator itemExchangeOperation()
             {
                 yield return null;
@@ -180,7 +191,7 @@ namespace SnowyCraftingCore.TerminalAdditions
                 OpenPort(true);
                 yield return new WaitForSeconds(1f);
 
-                AwaitingItem = inputItem;
+                AwaitingItems = inputItems;
 
                 float elapsedTime = 0f;
                 while (elapsedTime < inputTime && ItemInSlot == null)
@@ -188,18 +199,11 @@ namespace SnowyCraftingCore.TerminalAdditions
                     yield return null;
                     elapsedTime += Time.deltaTime;
                 }
-                AwaitingItem = null;
+                AwaitingItems = [];
 
                 OpenPort(false);
 
-                elapsedTime = 0f;
-                while (elapsedTime < 1f)
-                {
-                    yield return null;
-                    elapsedTime += Time.deltaTime;
-
-                    //if (ItemInSlot != null) ItemInSlot.transform.position = itemPosition.position;
-                }
+                yield return new WaitForSeconds(1f);
 
                 if (ItemInSlot == null)
                 {
@@ -244,6 +248,208 @@ namespace SnowyCraftingCore.TerminalAdditions
                     routine = null;
                     yield break;
                 }
+
+                OpenPort(true);
+                yield return new WaitForSeconds(1f);
+
+                elapsedTime = 0f;
+                while (elapsedTime < outputTime && ItemInSlot.playerHeldBy == null && !ItemInSlot.isHeldByEnemy)
+                {
+                    yield return null;
+                    elapsedTime += Time.deltaTime;
+                }
+
+                if (ItemInSlot.playerHeldBy != null || ItemInSlot.isHeldByEnemy)
+                    ItemInSlot = null;
+
+                OpenPort(false);
+                yield return new WaitForSeconds(1f);
+
+                if (ItemInSlot != null && IsServer)
+                    ItemInSlot.NetworkObject.Despawn(destroy: true);
+
+                ItemInSlot = null;
+                routine = null;
+            }
+
+            if (routine != null) { logger.LogError("Operation failed, dispenser is in use"); return; }
+            routine = StartCoroutine(itemExchangeOperation());
+        }
+
+        public void ItemExchangeOperation(Item inputItem, Item outputItem, Action<GrabbableObject, GrabbableObject> operation, float inputTime, float operationTime, float outputTime)
+        {
+            ItemExchangeOperation([inputItem], outputItem, operation, inputTime, operationTime, outputTime);
+        }
+
+        public void ItemExchangeOperation(Item[] inputItems, Item outputItem, Action<GrabbableObject, GrabbableObject> operation, float inputTime, float operationTime, float outputTime)
+        {
+            IEnumerator itemExchangeOperation()
+            {
+                yield return null;
+
+                OpenPort(true);
+                yield return new WaitForSeconds(1f);
+
+                AwaitingItems = inputItems;
+
+                float elapsedTime = 0f;
+                while (elapsedTime < inputTime && ItemInSlot == null)
+                {
+                    yield return null;
+                    elapsedTime += Time.deltaTime;
+                }
+                AwaitingItems = [];
+
+                OpenPort(false);
+
+                yield return new WaitForSeconds(1f);
+
+                if (ItemInSlot == null)
+                {
+                    logger.LogError("Operation failed, no item was inserted into the item slot");
+                    routine = null;
+                    yield break;
+                }
+
+                var spawnedInputItem = ItemInSlot;
+                ItemInSlot = null;
+
+                audioSource.Play();
+                yield return new WaitForSeconds(operationTime);
+                audioSource.Stop();
+
+                if (IsServer)
+                {
+                    ItemInSlot = Utils.SpawnItem(outputItem, itemPosition); // TODO: Test this
+                    if (ItemInSlot == null)
+                    {
+                        logger.LogError("Operation failed, failed to spawn item");
+                        spawnedInputItem.NetworkObject.Despawn(destroy: true);
+                        routine = null;
+                        yield break;
+                    }
+
+                    yield return new WaitUntil(() => ItemInSlot.NetworkObject != null && ItemInSlot.NetworkObject.IsSpawned);
+                    SetItemInSlotRpc(ItemInSlot.NetworkObject);
+                }
+
+                elapsedTime = 0f;
+                while (ItemInSlot == null && elapsedTime < 10)
+                {
+                    yield return null;
+                    elapsedTime += Time.deltaTime;
+                }
+
+                if (ItemInSlot == null)
+                {
+                    logger.LogError("Operation failed, failed to spawn item");
+                    routine = null;
+                    yield break;
+                }
+
+                operation.Invoke(spawnedInputItem, ItemInSlot);
+
+                if (IsServer)
+                    spawnedInputItem.NetworkObject.Despawn(destroy: true);
+
+                OpenPort(true);
+                yield return new WaitForSeconds(1f);
+
+                elapsedTime = 0f;
+                while (elapsedTime < outputTime && ItemInSlot.playerHeldBy == null && !ItemInSlot.isHeldByEnemy)
+                {
+                    yield return null;
+                    elapsedTime += Time.deltaTime;
+                }
+
+                if (ItemInSlot.playerHeldBy != null || ItemInSlot.isHeldByEnemy)
+                    ItemInSlot = null;
+
+                OpenPort(false);
+                yield return new WaitForSeconds(1f);
+
+                if (ItemInSlot != null && IsServer)
+                    ItemInSlot.NetworkObject.Despawn(destroy: true);
+
+                ItemInSlot = null;
+                routine = null;
+            }
+
+            if (routine != null) { logger.LogError("Operation failed, dispenser is in use"); return; }
+            routine = StartCoroutine(itemExchangeOperation());
+        }
+
+        public void ItemExchangeOperation(Item[] inputItems, Item[] outputItems, Action<GrabbableObject, GrabbableObject> operation, float inputTime, float operationTime, float outputTime)
+        {
+            IEnumerator itemExchangeOperation()
+            {
+                yield return null;
+
+                OpenPort(true);
+                yield return new WaitForSeconds(1f);
+
+                AwaitingItems = inputItems;
+
+                float elapsedTime = 0f;
+                while (elapsedTime < inputTime && ItemInSlot == null)
+                {
+                    yield return null;
+                    elapsedTime += Time.deltaTime;
+                }
+                AwaitingItems = [];
+
+                OpenPort(false);
+
+                yield return new WaitForSeconds(1f);
+
+                if (ItemInSlot == null)
+                {
+                    logger.LogError("Operation failed, no item was inserted into the item slot");
+                    routine = null;
+                    yield break;
+                }
+
+                var spawnedInputItem = ItemInSlot;
+                int itemIndex = Array.IndexOf(inputItems, spawnedInputItem);
+                ItemInSlot = null;
+
+                audioSource.Play();
+                yield return new WaitForSeconds(operationTime);
+                audioSource.Stop();
+
+                if (IsServer)
+                {
+                    ItemInSlot = Utils.SpawnItem(outputItems[itemIndex], itemPosition); // TODO: Test this
+                    if (ItemInSlot == null)
+                    {
+                        logger.LogError("Operation failed, failed to spawn item");
+                        spawnedInputItem.NetworkObject.Despawn(destroy: true);
+                        routine = null;
+                        yield break;
+                    }
+
+                    yield return new WaitUntil(() => ItemInSlot.NetworkObject != null && ItemInSlot.NetworkObject.IsSpawned);
+                    SetItemInSlotRpc(ItemInSlot.NetworkObject);
+                }
+
+                elapsedTime = 0f;
+                while (ItemInSlot == null && elapsedTime < 10)
+                {
+                    yield return null;
+                    elapsedTime += Time.deltaTime;
+                }
+
+                if (ItemInSlot == null)
+                {
+                    logger.LogError("Operation failed, failed to spawn item");
+                    routine = null;
+                    yield break;
+                }
+
+                operation.Invoke(spawnedInputItem, ItemInSlot);
+
+                if (IsServer)
+                    spawnedInputItem.NetworkObject.Despawn(destroy: true);
 
                 OpenPort(true);
                 yield return new WaitForSeconds(1f);
