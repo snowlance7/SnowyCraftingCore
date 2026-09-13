@@ -66,6 +66,10 @@ namespace SnowyCraftingCore
                     case "/test":
                         HUDManager.Instance.DisplayTip("test", "test");
                         break;
+                    case "/testport":
+                        SmallItemDispenser.DEBUG_testingSlot = !SmallItemDispenser.DEBUG_testingSlot;
+                        SmallItemDispenser.Instance?.OpenPort(SmallItemDispenser.DEBUG_testingSlot);
+                        break;
                     default:
                         break;
                 }

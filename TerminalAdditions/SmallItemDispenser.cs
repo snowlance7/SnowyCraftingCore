@@ -24,6 +24,8 @@ namespace SnowyCraftingCore.TerminalAdditions
 
         Coroutine? routine;
 
+        public static bool DEBUG_testingSlot = false;
+
         public bool IsBeingUsed => routine != null;
 
         public bool AwaitingItemPlacement => AwaitingItems.Length > 0;
@@ -31,6 +33,8 @@ namespace SnowyCraftingCore.TerminalAdditions
         public Item[] AwaitingItems { get; private set; } = [];
 
         public GrabbableObject? ItemInSlot { get; private set; }
+        Vector3 itemInSlotPositionOffset = new Vector3();
+        Vector3 itemInSlotRotationOffset = new Vector3();
 
         Transform? parentObject;
 
@@ -58,8 +62,8 @@ namespace SnowyCraftingCore.TerminalAdditions
 
         private void Update()
         {
-            interactTriggerCollider.enabled = AwaitingItemPlacement;
-            interactTrigger.interactable = localPlayer.currentlyHeldObjectServer != null && AwaitingItems.Contains(localPlayer.currentlyHeldObjectServer.itemProperties);
+            interactTriggerCollider.enabled = ItemInSlot == null && (AwaitingItemPlacement || DEBUG_testingSlot);
+            interactTrigger.interactable = localPlayer.currentlyHeldObjectServer != null && (AwaitingItems.Contains(localPlayer.currentlyHeldObjectServer.itemProperties) || DEBUG_testingSlot);
         }
 
         private void LateUpdate()
@@ -76,20 +80,32 @@ namespace SnowyCraftingCore.TerminalAdditions
 
             if (ItemInSlot != null)
             {
-                ItemInSlot.transform.position = itemPosition.position;
+                if (ItemInSlot.isHeld) { ItemInSlot = null; return; }
+
                 ItemInSlot.transform.rotation = itemPosition.rotation;
+                ItemInSlot.transform.Rotate(itemInSlotRotationOffset);
+                ItemInSlot.transform.position = itemPosition.position;
+                Vector3 _positionOffset = itemInSlotPositionOffset;
+                _positionOffset = itemPosition.rotation * _positionOffset;
+                ItemInSlot.transform.position += _positionOffset;
+            }
+            else
+            {
+                itemInSlotPositionOffset = Vector3.zero;
+                itemInSlotRotationOffset = Vector3.zero;
             }
         }
 
         public void OnInteract()
         {
-            if (AwaitingItems.Length == 0 || localPlayer.currentlyHeldObjectServer == null || !AwaitingItems.Contains(localPlayer.currentlyHeldObjectServer.itemProperties) || localPlayer.isGrabbingObjectAnimation) { return; }
+            if (localPlayer.currentlyHeldObjectServer == null || localPlayer.isGrabbingObjectAnimation) { return; }
+            if ((AwaitingItems.Length == 0 || !AwaitingItems.Contains(localPlayer.currentlyHeldObjectServer.itemProperties)) && !DEBUG_testingSlot) { return; }
             GrabbableObject insertingItem = localPlayer.currentlyHeldObjectServer;
             localPlayer.DiscardHeldObject(true, NetworkObject, NetworkObject.transform.InverseTransformPoint(itemPosition.position), false);
             SetItemInSlotRpc(insertingItem.NetworkObject);
         }
 
-        private void OpenPort(bool open)
+        internal void OpenPort(bool open)
         {
             animator.SetBool("open", open);
 
@@ -99,12 +115,12 @@ namespace SnowyCraftingCore.TerminalAdditions
                 audioSource.PlayOneShot(closeSFX);
         }
 
-        public void ItemModificationOperation(Item inputItem, Action<GrabbableObject> operation, float inputTime, float operationTime, float outputTime)
+        public void ItemModificationOperation(DispensableItem inputItem, Action<GrabbableObject> operation, float inputTime, float operationTime, float outputTime)
         {
             ItemModificationOperation([inputItem], operation, inputTime, operationTime, outputTime);
         }
 
-        public void ItemModificationOperation(Item[] inputItems, Action<GrabbableObject> operation, float inputTime, float operationTime, float outputTime)
+        public void ItemModificationOperation(DispensableItem[] inputItems, Action<GrabbableObject> operation, float inputTime, float operationTime, float outputTime)
         {
             IEnumerator itemModificationOperation()
             {
@@ -113,7 +129,7 @@ namespace SnowyCraftingCore.TerminalAdditions
                 OpenPort(true);
                 yield return new WaitForSeconds(1f);
 
-                AwaitingItems = inputItems;
+                AwaitingItems = inputItems.Select(x => x.item).ToArray();
 
                 float elapsedTime = 0f;
                 while (elapsedTime < inputTime && ItemInSlot == null)
@@ -122,19 +138,18 @@ namespace SnowyCraftingCore.TerminalAdditions
                     elapsedTime += Time.deltaTime;
                 }
 
+                if (ItemInSlot != null)
+                {
+                    var dispensableItemInSlot = inputItems.Where(x => x.item == ItemInSlot.itemProperties).First();
+                    itemInSlotPositionOffset = dispensableItemInSlot.positionOffset;
+                    itemInSlotRotationOffset = dispensableItemInSlot.rotationOffset;
+                }
+
                 AwaitingItems = [];
 
                 OpenPort(false);
 
-                elapsedTime = 0f;
-                while (elapsedTime < 1f)
-                {
-                    yield return null;
-                    elapsedTime += Time.deltaTime;
-
-                    if (ItemInSlot != null)
-                        ItemInSlot.transform.position = itemPosition.position;
-                }
+                yield return new WaitForSeconds(1f);
 
                 if (ItemInSlot == null)
                 {
@@ -176,12 +191,12 @@ namespace SnowyCraftingCore.TerminalAdditions
             routine = StartCoroutine(itemModificationOperation());
         }
 
-        public void ItemExchangeOperation(Item inputItem, Item outputItem, float inputTime, float operationTime, float outputTime)
+        public void ItemExchangeOperation(DispensableItem inputItem, DispensableItem outputItem, float inputTime, float operationTime, float outputTime)
         {
             ItemExchangeOperation([inputItem], outputItem, inputTime, operationTime, outputTime);
         }
 
-        public void ItemExchangeOperation(Item[] inputItems, Item outputItem, float inputTime, float operationTime, float outputTime)
+        public void ItemExchangeOperation(DispensableItem[] inputItems, DispensableItem outputItem, float inputTime, float operationTime, float outputTime)
         {
             IEnumerator itemExchangeOperation()
             {
@@ -191,7 +206,7 @@ namespace SnowyCraftingCore.TerminalAdditions
                 OpenPort(true);
                 yield return new WaitForSeconds(1f);
 
-                AwaitingItems = inputItems;
+                AwaitingItems = inputItems.Select(x => x.item).ToArray();
 
                 float elapsedTime = 0f;
                 while (elapsedTime < inputTime && ItemInSlot == null)
@@ -199,6 +214,14 @@ namespace SnowyCraftingCore.TerminalAdditions
                     yield return null;
                     elapsedTime += Time.deltaTime;
                 }
+
+                if (ItemInSlot != null)
+                {
+                    var dispensableItemInSlot = inputItems.Where(x => x.item == ItemInSlot.itemProperties).First();
+                    itemInSlotPositionOffset = dispensableItemInSlot.positionOffset;
+                    itemInSlotRotationOffset = dispensableItemInSlot.rotationOffset;
+                }
+
                 AwaitingItems = [];
 
                 OpenPort(false);
@@ -223,7 +246,7 @@ namespace SnowyCraftingCore.TerminalAdditions
 
                 if (IsServer)
                 {
-                    ItemInSlot = Utils.SpawnItem(outputItem, itemPosition); // TODO: Test this
+                    ItemInSlot = Utils.SpawnItem(outputItem.item, itemPosition); // TODO: Test this
                     if (ItemInSlot == null)
                     {
                         logger.LogError("Operation failed, failed to spawn item");
@@ -247,6 +270,11 @@ namespace SnowyCraftingCore.TerminalAdditions
                     logger.LogError("Operation failed, failed to spawn item");
                     routine = null;
                     yield break;
+                }
+                else
+                {
+                    itemInSlotPositionOffset = outputItem.positionOffset;
+                    itemInSlotRotationOffset = outputItem.rotationOffset;
                 }
 
                 OpenPort(true);
@@ -276,12 +304,12 @@ namespace SnowyCraftingCore.TerminalAdditions
             routine = StartCoroutine(itemExchangeOperation());
         }
 
-        public void ItemExchangeOperation(Item inputItem, Item outputItem, Action<GrabbableObject, GrabbableObject> operation, float inputTime, float operationTime, float outputTime)
+        public void ItemExchangeOperation(DispensableItem inputItem, DispensableItem outputItem, Action<GrabbableObject, GrabbableObject> operation, float inputTime, float operationTime, float outputTime)
         {
             ItemExchangeOperation([inputItem], outputItem, operation, inputTime, operationTime, outputTime);
         }
 
-        public void ItemExchangeOperation(Item[] inputItems, Item outputItem, Action<GrabbableObject, GrabbableObject> operation, float inputTime, float operationTime, float outputTime)
+        public void ItemExchangeOperation(DispensableItem[] inputItems, DispensableItem outputItem, Action<GrabbableObject, GrabbableObject> operation, float inputTime, float operationTime, float outputTime)
         {
             IEnumerator itemExchangeOperation()
             {
@@ -290,7 +318,7 @@ namespace SnowyCraftingCore.TerminalAdditions
                 OpenPort(true);
                 yield return new WaitForSeconds(1f);
 
-                AwaitingItems = inputItems;
+                AwaitingItems = inputItems.Select(x => x.item).ToArray();
 
                 float elapsedTime = 0f;
                 while (elapsedTime < inputTime && ItemInSlot == null)
@@ -298,6 +326,14 @@ namespace SnowyCraftingCore.TerminalAdditions
                     yield return null;
                     elapsedTime += Time.deltaTime;
                 }
+
+                if (ItemInSlot != null)
+                {
+                    var dispensableItemInSlot = inputItems.Where(x => x.item == ItemInSlot.itemProperties).First();
+                    itemInSlotPositionOffset = dispensableItemInSlot.positionOffset;
+                    itemInSlotRotationOffset = dispensableItemInSlot.rotationOffset;
+                }
+
                 AwaitingItems = [];
 
                 OpenPort(false);
@@ -320,7 +356,7 @@ namespace SnowyCraftingCore.TerminalAdditions
 
                 if (IsServer)
                 {
-                    ItemInSlot = Utils.SpawnItem(outputItem, itemPosition); // TODO: Test this
+                    ItemInSlot = Utils.SpawnItem(outputItem.item, itemPosition); // TODO: Test this
                     if (ItemInSlot == null)
                     {
                         logger.LogError("Operation failed, failed to spawn item");
@@ -345,6 +381,11 @@ namespace SnowyCraftingCore.TerminalAdditions
                     logger.LogError("Operation failed, failed to spawn item");
                     routine = null;
                     yield break;
+                }
+                else
+                {
+                    itemInSlotPositionOffset = outputItem.positionOffset;
+                    itemInSlotRotationOffset = outputItem.rotationOffset;
                 }
 
                 operation.Invoke(spawnedInputItem, ItemInSlot);
@@ -379,7 +420,7 @@ namespace SnowyCraftingCore.TerminalAdditions
             routine = StartCoroutine(itemExchangeOperation());
         }
 
-        public void ItemExchangeOperation(Item[] inputItems, Item[] outputItems, Action<GrabbableObject, GrabbableObject> operation, float inputTime, float operationTime, float outputTime)
+        public void ItemExchangeOperation(DispensableItem[] inputItems, DispensableItem[] outputItems, Action<GrabbableObject, GrabbableObject> operation, float inputTime, float operationTime, float outputTime)
         {
             IEnumerator itemExchangeOperation()
             {
@@ -388,7 +429,7 @@ namespace SnowyCraftingCore.TerminalAdditions
                 OpenPort(true);
                 yield return new WaitForSeconds(1f);
 
-                AwaitingItems = inputItems;
+                AwaitingItems = inputItems.Select(x => x.item).ToArray();
 
                 float elapsedTime = 0f;
                 while (elapsedTime < inputTime && ItemInSlot == null)
@@ -396,6 +437,14 @@ namespace SnowyCraftingCore.TerminalAdditions
                     yield return null;
                     elapsedTime += Time.deltaTime;
                 }
+
+                if (ItemInSlot != null)
+                {
+                    var dispensableItemInSlot = inputItems.Where(x => x.item == ItemInSlot.itemProperties).First();
+                    itemInSlotPositionOffset = dispensableItemInSlot.positionOffset;
+                    itemInSlotRotationOffset = dispensableItemInSlot.rotationOffset;
+                }
+
                 AwaitingItems = [];
 
                 OpenPort(false);
@@ -419,7 +468,7 @@ namespace SnowyCraftingCore.TerminalAdditions
 
                 if (IsServer)
                 {
-                    ItemInSlot = Utils.SpawnItem(outputItems[itemIndex], itemPosition); // TODO: Test this
+                    ItemInSlot = Utils.SpawnItem(outputItems[itemIndex].item, itemPosition); // TODO: Test this
                     if (ItemInSlot == null)
                     {
                         logger.LogError("Operation failed, failed to spawn item");
@@ -444,6 +493,12 @@ namespace SnowyCraftingCore.TerminalAdditions
                     logger.LogError("Operation failed, failed to spawn item");
                     routine = null;
                     yield break;
+                }
+                else
+                {
+                    var dispensableItemInSlot = outputItems.Where(x => x.item == ItemInSlot.itemProperties).First();
+                    itemInSlotPositionOffset = dispensableItemInSlot.positionOffset;
+                    itemInSlotRotationOffset = dispensableItemInSlot.rotationOffset;
                 }
 
                 operation.Invoke(spawnedInputItem, ItemInSlot);
@@ -478,7 +533,7 @@ namespace SnowyCraftingCore.TerminalAdditions
             routine = StartCoroutine(itemExchangeOperation());
         }
 
-        public void ItemDispenseOperation(Item item, float outputTime)
+        public void ItemDispenseOperation(DispensableItem item, float outputTime)
         {
             IEnumerator itemDispenseOperation()
             {
@@ -486,7 +541,7 @@ namespace SnowyCraftingCore.TerminalAdditions
 
                 if (IsServer)
                 {
-                    ItemInSlot = Utils.SpawnItem(item, itemPosition); // TODO: Test this
+                    ItemInSlot = Utils.SpawnItem(item.item, itemPosition); // TODO: Test this
                     if (ItemInSlot == null)
                     {
                         logger.LogError("Operation failed, failed to spawn item");
@@ -510,6 +565,11 @@ namespace SnowyCraftingCore.TerminalAdditions
                     logger.LogError("Operation failed, failed to spawn item");
                     routine = null;
                     yield break;
+                }
+                else
+                {
+                    itemInSlotPositionOffset = item.positionOffset;
+                    itemInSlotRotationOffset = item.rotationOffset;
                 }
 
                 OpenPort(true);
@@ -539,7 +599,7 @@ namespace SnowyCraftingCore.TerminalAdditions
             routine = StartCoroutine(itemDispenseOperation());
         }
 
-        public void ItemDispenseOperation(Item item, Action<GrabbableObject> operation, float outputTime)
+        public void ItemDispenseOperation(DispensableItem item, Action<GrabbableObject> operation, float outputTime)
         {
             IEnumerator itemDispenseOperation()
             {
@@ -547,7 +607,7 @@ namespace SnowyCraftingCore.TerminalAdditions
 
                 if (IsServer)
                 {
-                    ItemInSlot = Utils.SpawnItem(item, itemPosition, worldPositionStays: true); // TODO: Test this
+                    ItemInSlot = Utils.SpawnItem(item.item, itemPosition, worldPositionStays: true); // TODO: Test this
                     if (ItemInSlot == null)
                     {
                         logger.LogError("Operation failed, failed to spawn item");
@@ -571,6 +631,11 @@ namespace SnowyCraftingCore.TerminalAdditions
                     logger.LogError("Operation failed, failed to spawn item");
                     routine = null;
                     yield break;
+                }
+                else
+                {
+                    itemInSlotPositionOffset = item.positionOffset;
+                    itemInSlotRotationOffset = item.rotationOffset;
                 }
 
                 operation.Invoke(ItemInSlot);
@@ -608,8 +673,14 @@ namespace SnowyCraftingCore.TerminalAdditions
             if (!netRef.TryGet(out NetworkObject netObj)) { return; }
             if (!netObj.TryGetComponent(out GrabbableObject item)) { return; }
             ItemInSlot = item;
-            //ItemInSlot.transform.SetParent(itemPosition, true);
         }
+    }
+
+    public class DispensableItem(Item item, Vector3 positionOffset = default, Vector3 rotationOffset = default)
+    {
+        public Item item = item;
+        public Vector3 positionOffset = positionOffset;
+        public Vector3 rotationOffset = rotationOffset;
     }
 
     [HarmonyPatch]
