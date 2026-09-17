@@ -1,0 +1,13 @@
+host using alembic works perfectly
+
+client using alembic:
+- alembic fluid doesnt change color
+- output fluid doesnt show up and other players cant interact with it
+- when interacting with output fluid item doesnt spawn
+
+
+host using analyzer works perfectly 
+
+client using analyzer works perfectly
+
+apparatus slot only works for person using it (open/closing)

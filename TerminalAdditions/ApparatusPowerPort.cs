@@ -1,6 +1,7 @@
 ﻿using Dawn;
 using HarmonyLib;
 using SnowyCraftingCore.Interfaces;
+using SnowyLib;
 using Unity.Netcode;
 using UnityEngine;
 using static SnowyCraftingCore.Plugin;
@@ -10,7 +11,6 @@ namespace SnowyCraftingCore.TerminalAdditions
     public class ApparatusPowerPort : NetworkBehaviour
     {
         public static ApparatusPowerPort? Instance { get; private set; } = null!;
-        private static Terminal terminal = null!;
 
         [SerializeField] AudioSource audioSource = null!;
         [SerializeField] AudioClip openSFX = null!;
@@ -28,19 +28,20 @@ namespace SnowyCraftingCore.TerminalAdditions
 
         public bool IsOpen { get; private set; }
 
-        static Transform TerminalTransform => terminal.gameObject.transform.parent.parent;
-        static Transform HangarShipTransform => terminal.gameObject.transform.parent.parent.parent;
+        static Transform TerminalTransform => Utils.terminal.gameObject.transform.parent.parent;
+        static Transform HangarShipTransform => Utils.terminal.gameObject.transform.parent.parent.parent;
 
         static Vector3 positionOffset = new Vector3(-0.05f, 0.395f, -0.7f);
         static Vector3 rotationOffset = new Vector3(90, 0, 0);
 
         internal static void Init()
         {
-            if (!IsServerOrHost) { return; }
-            if (SnowyCraftingCoreContentHandler.Instance.ApparatusPowerPort == null) { return; }
-            terminal = FindObjectOfType<Terminal>();
-            var obj = Instantiate(SnowyCraftingCoreContentHandler.Instance.ApparatusPowerPort.ApparatusPowerPortPrefab, HangarShipTransform);
-            obj.GetComponent<NetworkObject>().Spawn(destroyWithScene: false);
+            if (IsServerOrHost)
+            {
+                if (SnowyCraftingCoreContentHandler.Instance.ApparatusPowerPort == null) { return; }
+                var obj = Instantiate(SnowyCraftingCoreContentHandler.Instance.ApparatusPowerPort.ApparatusPowerPortPrefab, HangarShipTransform);
+                obj.GetComponent<NetworkObject>().Spawn(destroyWithScene: false);
+            }
 
             positionOffset = PluginInstance.Config.Bind("Apparatus Power Port Options", "Position Offset", new Vector3(-0.05f, 0.395f, -0.7f), "Position offset from the terminals position").Value;
             rotationOffset = PluginInstance.Config.Bind("Apparatus Power Port Options", "Rotation Offset", new Vector3(90, 0, 0), "Rotation offset from the terminals position").Value;
@@ -77,6 +78,7 @@ namespace SnowyCraftingCore.TerminalAdditions
 
         internal void Update()
         {
+            if (localPlayer == null) { return; }
             interactTriggerCollider.enabled = !IsApparatusInSlot && IsOpen;
             interactTrigger.interactable = localPlayer.currentlyHeldObjectServer != null && localPlayer.currentlyHeldObjectServer is LungProp;
 

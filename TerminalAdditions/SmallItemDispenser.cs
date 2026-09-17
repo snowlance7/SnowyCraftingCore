@@ -12,7 +12,6 @@ namespace SnowyCraftingCore.TerminalAdditions
     public class SmallItemDispenser : NetworkBehaviour
     {
         public static SmallItemDispenser? Instance { get; private set; } = null!;
-        private static Terminal terminal = null!;
 
         [SerializeField] AudioSource audioSource = null!;
         [SerializeField] AudioClip openSFX = null!;
@@ -45,8 +44,7 @@ namespace SnowyCraftingCore.TerminalAdditions
         {
             if (!IsServerOrHost) { return; }
             if (SnowyCraftingCoreContentHandler.Instance.SmallItemDispenser == null) { return; }
-            terminal = FindObjectOfType<Terminal>();
-            var obj = Instantiate(SnowyCraftingCoreContentHandler.Instance.SmallItemDispenser.SmallItemDispenserPrefab, terminal.gameObject.transform.parent.parent.parent);
+            var obj = Instantiate(SnowyCraftingCoreContentHandler.Instance.SmallItemDispenser.SmallItemDispenserPrefab, Utils.terminal.gameObject.transform.parent.parent.parent);
             obj.GetComponent<NetworkObject>().Spawn(destroyWithScene: false);
 
             positionOffset = PluginInstance.Config.Bind("Small Item Dispenser Options", "Position Offset", new Vector3(-0.55f, 0.99f, 0.6f), "Position offset from the terminals position").Value;
@@ -56,12 +54,13 @@ namespace SnowyCraftingCore.TerminalAdditions
         private void Start()
         {
             Instance ??= this;
-            transform.SetParent(terminal.gameObject.transform.parent.parent.parent);
-            parentObject = terminal.gameObject.transform.parent.parent;
+            transform.SetParent(Utils.terminal.gameObject.transform.parent.parent.parent);
+            parentObject = Utils.terminal.gameObject.transform.parent.parent;
         }
 
         private void Update()
         {
+            if (localPlayer == null) { return; }
             interactTriggerCollider.enabled = ItemInSlot == null && (AwaitingItemPlacement || DEBUG_testingSlot);
             interactTrigger.interactable = localPlayer.currentlyHeldObjectServer != null && (AwaitingItems.Contains(localPlayer.currentlyHeldObjectServer.itemProperties) || DEBUG_testingSlot);
         }
