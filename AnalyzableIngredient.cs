@@ -1,9 +1,10 @@
-﻿using GameNetcodeStuff;
+﻿using Dawn;
+using GameNetcodeStuff;
 using System;
 
 namespace SnowyCraftingCore
 {
-    public class AnalyzableIngredient(Item item, Action<AnalyzableIngredient, PlayerControllerB> result, ChemistryLiquidAppearance? chemistryLiquidAppearance = null, string specialInstructions = "", bool despawnItem = false, bool holdItem = true) : ChemistryIngredient(item, chemistryLiquidAppearance, specialInstructions), IEquatable<AnalyzableIngredient>
+    public class AnalyzableIngredient(NamespacedKey<DawnItemInfo> item, Action<AnalyzableIngredient, PlayerControllerB> result, ChemistryLiquidAppearance? chemistryLiquidAppearance = null, string specialInstructions = "", bool despawnItem = false, bool holdItem = true) : ChemistryIngredient(item, chemistryLiquidAppearance, specialInstructions), IEquatable<AnalyzableIngredient>
     {
         public Action<AnalyzableIngredient, PlayerControllerB> result = result;
         public bool despawnItem = despawnItem;
@@ -16,7 +17,7 @@ namespace SnowyCraftingCore
 
         public override string ToString()
         {
-            return item.name;
+            return item.ToString();
         }
     }
 }

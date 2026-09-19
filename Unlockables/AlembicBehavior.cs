@@ -7,6 +7,8 @@ using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
 using static SnowyCraftingCore.Plugin;
+using static Steamworks.InventoryRecipe;
+using Dawn;
 
 namespace SnowyCraftingCore.Unlockables
 {
@@ -35,7 +37,7 @@ namespace SnowyCraftingCore.Unlockables
         ParticleSystemRenderer inputParticleSystemRenderer = null!;
 
         bool mixing;
-        ChemistryLiquidAppearance inputDefaultColor = null!;
+        ChemistryLiquidAppearance inputDefaultColor;
         const float defaultMixingTime = 10f;
 
         public void Awake()
@@ -55,7 +57,44 @@ namespace SnowyCraftingCore.Unlockables
         public void InputTrigger_Interact()
         {
             if (localPlayer.currentlyHeldObjectServer == null || localPlayer.currentlyHeldObjectServer.itemProperties.twoHanded) { return; }
-            InputIngredientRpc(localPlayer.currentlyHeldObjectServer.NetworkObject);
+
+            GrabbableObject item = localPlayer.currentlyHeldObjectServer;
+            NamespacedKey<DawnItemInfo> itemKey = item.itemProperties.GetDawnInfo().TypedKey;
+
+            ChemistryIngredient? ingredient = null;
+            bool despawningIngredientItem = true;
+
+            if (item is IChemistryIngredient _ingredient)
+            {
+                logger.LogDebug("item is IChemistryIngredient");
+                ingredient = _ingredient.GetIngredient();
+                logger.LogDebug($"Got IChemistryIngredient: {ingredient?.ToString()}");
+
+                if (ingredient != null && _ingredient is IDistillableIngredient distillableIngredient)
+                {
+                    ChemistryIngredient? outputIngredient = distillableIngredient.DistilleryOutput();
+                    float mixTime = distillableIngredient.DistilleryMixTime();
+                    despawningIngredientItem = distillableIngredient.DespawnItemAfterDistilleryInput();
+
+                    if (despawningIngredientItem) { localPlayer.DespawnHeldObject(); }
+
+                    InputIngredientRpc(ingredient, outputIngredient, mixTime);
+                    return;
+                }
+            }
+
+            ingredient ??= ChemicalMixerBehavior.RegisteredIngredients.Where(x => x.item == itemKey).FirstOrDefault();
+
+            if (ingredient == null)
+            {
+                logger.LogDebug($"Unable to find registered ingredient for {item.name}, creating default ingredient");
+                Color color = UnityEngine.Random.ColorHSV();
+                ingredient = new ChemistryIngredient(itemKey, new ChemistryLiquidAppearance(color, 5f));
+            }
+
+            if (despawningIngredientItem) { localPlayer.DespawnHeldObject(); }
+
+            InputIngredientRpc(ingredient);
         }
 
         public void OutputTrigger_Interact()
@@ -67,6 +106,7 @@ namespace SnowyCraftingCore.Unlockables
         private void SetInputFlaskColor(ChemistryLiquidAppearance color)
         {
             //inputRenderer.enabled = true;
+            logger.LogDebug("Setting input flash color to " + color.ToString());
             inputRenderer.material.color = color.liquidColor;
             inputRenderer.material.SetColor("_EmissionColor", color.liquidColor);
             inputRenderer.material.SetFloat("_EmissionIntensity", color.emissionIntensity);
@@ -78,44 +118,23 @@ namespace SnowyCraftingCore.Unlockables
 
         private void SetOutputFlaskColor(ChemistryLiquidAppearance color)
         {
+            logger.LogDebug("Setting output flash color to " + color.ToString());
             outputRenderer.enabled = true;
             outputRenderer.sharedMaterial.color = color.liquidColor;
             outputRenderer.sharedMaterial.SetColor("_EmissionColor", color.liquidColor);
             outputRenderer.sharedMaterial.SetFloat("_EmissionIntensity", color.emissionIntensity);
         }
 
-        [Rpc(SendTo.Everyone)]
-        private void InputIngredientRpc(NetworkObjectReference netRef)
+        [Rpc(SendTo.Everyone, RequireOwnership = false)]
+        private void InputIngredientRpc(ChemistryIngredient ingredient)
         {
-            if (!netRef.TryGet(out NetworkObject netObj)) { return; }
-            if (!netObj.TryGetComponent(out GrabbableObject item)) { return; }
+            logger.LogDebug("InputIngredientRpc");
 
             inputIngredient = null;
             currentlyMixingRecipe = null;
 
-            ChemistryIngredient? ingredient = null;
-            bool despawningIngredientItem = true;
 
-            if (item is IChemistryIngredient _ingredient)
-            {
-                ingredient = _ingredient.GetIngredient();
-
-                if (ingredient != null && _ingredient is IDistillableIngredient distillableIngredient)
-                {
-                    currentlyMixingRecipe = new DistilleryFixedOutputReaction(ingredient, distillableIngredient.DistilleryOutput(), distillableIngredient.DistilleryMixTime());
-                    despawningIngredientItem = distillableIngredient.DespawnItemAfterDistilleryInput();
-                }
-                logger.LogDebug($"Got IChemistryIngredient: {ingredient?.ToString()}");
-            }
-
-            ingredient ??= ChemicalMixerBehavior.RegisteredIngredients.Where(x => x.item == item.itemProperties).FirstOrDefault();
-
-            if (ingredient == null)
-            {
-                logger.LogDebug($"Unable to find registered ingredient for {item.name}, creating default ingredient");
-                Color color = UnityEngine.Random.ColorHSV();
-                ingredient = new ChemistryIngredient(item.itemProperties, new ChemistryLiquidAppearance(color, 5f));
-            }
+            
 
             inputIngredient = ingredient;
             SetInputFlaskColor(ingredient.chemistryLiquidAppearance);
@@ -123,14 +142,27 @@ namespace SnowyCraftingCore.Unlockables
             currentlyMixingRecipe ??= RegisteredRecipes.Where(x => x.ingredient.Equals(ingredient)).FirstOrDefault();
             logger.LogDebug(currentlyMixingRecipe != null ? "Recipe found" : "Recipe not found");
 
-            if (localPlayer == item.playerHeldBy && despawningIngredientItem)
-                localPlayer.DespawnHeldObject();
+            mixing = true;
+            MixIngredients();
+        }
+
+        [Rpc(SendTo.Everyone, RequireOwnership = false)]
+        private void InputIngredientRpc(ChemistryIngredient ingredient, ChemistryIngredient? outputIngredient, float mixTime)
+        {
+            logger.LogDebug("InputIngredientRpc");
+
+            inputIngredient = ingredient;
+            currentlyMixingRecipe = new DistilleryFixedOutputReaction(ingredient, outputIngredient, mixTime);
+            SetInputFlaskColor(ingredient.chemistryLiquidAppearance);
+
+            currentlyMixingRecipe ??= RegisteredRecipes.Where(x => x.ingredient.Equals(ingredient)).FirstOrDefault();
+            logger.LogDebug(currentlyMixingRecipe != null ? "Recipe found" : "Recipe not found");
 
             mixing = true;
             MixIngredients();
         }
 
-        [Rpc(SendTo.Everyone)]
+        [Rpc(SendTo.Everyone, RequireOwnership = false)]
         private void OutputTrigger_InteractRpc(ulong clientId)
         {
             if (outputIngredient == null || mixing) { return; }
@@ -140,7 +172,7 @@ namespace SnowyCraftingCore.Unlockables
 
             if (IsServer && !(player.currentlyHeldObjectServer != null && player.currentlyHeldObjectServer is IChemistryOutputContainer container && container.ReceiveChemistryOutput(outputIngredient)))
             {
-                GrabbableObject? outputItem = Utils.SpawnItem(outputIngredient!.item.GetDawnInfo().TypedKey, player.transform.position);
+                GrabbableObject? outputItem = Utils.SpawnItem(outputIngredient.item, player.transform.position);
                 if (outputItem != null)
                 {
                     IEnumerator sendSpawnOutputIngredient(string specialInstructions)
@@ -158,14 +190,18 @@ namespace SnowyCraftingCore.Unlockables
             outputIngredient = null;
         }
 
-        [Rpc(SendTo.Everyone)]
+        [Rpc(SendTo.Everyone, RequireOwnership = false)]
         private void SpawnOutputIngredientRpc(ulong clientId, NetworkObjectReference netRef, string specialInstructions)
         {
-            if (!netRef.TryGet(out NetworkObject netObj)) { return; }
-            if (!netObj.TryGetComponent(out GrabbableObject item)) { return; }
+            logger.LogDebug("SpawnOutputIngredientRpc");
+            if (!netRef.TryGet(out NetworkObject netObj)) { logger.LogError("Failed to get network object from network object reference"); return; }
+            if (!netObj.TryGetComponent(out GrabbableObject item)) { logger.LogError("Failed to get grabbable object from network object"); return; }
 
             if (item is IChemistryIngredient ingredient)
+            {
+                logger.LogDebug("Outputting IChemistryIngredient");
                 ingredient.OnChemicalOutput(specialInstructions);
+            }
 
             if (localPlayer.actualClientId == clientId)
                 localPlayer.GrabGrabbableObject(item);
@@ -199,6 +235,7 @@ namespace SnowyCraftingCore.Unlockables
                 mixing = false;
             }
 
+            logger.LogDebug("Mixing ingredients coroutine");
             StartCoroutine(mixIngredients());
         }
     }

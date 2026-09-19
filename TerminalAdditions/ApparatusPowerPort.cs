@@ -45,30 +45,14 @@ namespace SnowyCraftingCore.TerminalAdditions
 
             positionOffset = PluginInstance.Config.Bind("Apparatus Power Port Options", "Position Offset", new Vector3(-0.05f, 0.395f, -0.7f), "Position offset from the terminals position").Value;
             rotationOffset = PluginInstance.Config.Bind("Apparatus Power Port Options", "Rotation Offset", new Vector3(90, 0, 0), "Rotation offset from the terminals position").Value;
-        }
 
-        internal static void InitTerminalCommands()
-        {
-            TerminalCommandBasicInformation eventDrivenCommandBasicInformation = new TerminalCommandBasicInformation("ToggleApparatusPort", "Other", "Opens/closes the apparatus port in the terminal", ClearText.Result | ClearText.Query);
-            DawnLib.DefineTerminalCommand(NamespacedKey<DawnTerminalCommandInfo>.From("snowy_crafting_core", "toggle_apparatus_port"), eventDrivenCommandBasicInformation, builder =>
-            {
-                builder.SetKeywords(["apparatus", "powerport"]);
-                builder.DefineEventDrivenCommand(eventDrivenCommandBuilder =>
-                {
-                    eventDrivenCommandBuilder.SetResultNodeDisplayText(() =>
-                    {
-                        if (Instance == null) { return "This command is not available"; }
-                        return $"Apparatus power port is {(Instance.IsOpen ? "closed" : "open")}\n\n";
-                    });
-                    eventDrivenCommandBuilder.SetOnTerminalEvent((terminal, node) =>
-                    {
-                        if (Instance == null) { logger.LogError("This command is not available"); return; }
-                        Instance.IsOpen = !Instance.IsOpen;
-                        Instance.OpenPort(Instance.IsOpen);
-                    });
-                });
-            });
-        }
+			TerminalAPI.RegisterTerminalCommand(new TerminalCommand("power", (args) =>
+			{
+                string message = $"{(Instance!.IsOpen ? "Closing" : "Opening")} apparatus power port";
+                Instance!.TogglePortRpc();
+                return message;
+			}, "Other", "Power", "Open/close the apparatus power port"));
+		}
 
         internal void Start()
         {
@@ -110,24 +94,25 @@ namespace SnowyCraftingCore.TerminalAdditions
             }
         }
 
-        private void OpenPort(bool open)
+        private void TogglePort()
         {
-            animator.SetBool("open", open);
+            IsOpen = !IsOpen;
+            animator.SetBool("open", IsOpen);
 
-            if (open)
+            if (IsOpen)
                 audioSource.PlayOneShot(openSFX);
             else
                 audioSource.PlayOneShot(closeSFX);
 
             if (apparatusInSlot != null)
             {
-                apparatusInSlot.EnablePhysics(open);
-                apparatusInSlot.EnableItemMeshes(open);
-                apparatusInSlot.gameObject.GetComponentInChildren<Light>().enabled = open;
+                apparatusInSlot.EnablePhysics(IsOpen);
+                apparatusInSlot.EnableItemMeshes(IsOpen);
+                apparatusInSlot.gameObject.GetComponentInChildren<Light>().enabled = IsOpen;
 
                 var audioSource = apparatusInSlot.gameObject.GetComponent<AudioSource>();
 
-                if (open)
+                if (IsOpen)
                 {
                     if (((ILungPropInterface)apparatusInSlot).PowerRemaining > 0f)
                     {
@@ -156,7 +141,7 @@ namespace SnowyCraftingCore.TerminalAdditions
             SetApparatusInSlotRpc(insertingItem.NetworkObject);
         }
 
-        [Rpc(SendTo.Everyone)]
+        [Rpc(SendTo.Everyone, RequireOwnership = false)]
         private void SetApparatusInSlotRpc(NetworkObjectReference netRef)
         {
             if (IsApparatusInSlot) { return; }
@@ -169,6 +154,12 @@ namespace SnowyCraftingCore.TerminalAdditions
             audioSource.PlayOneShot(apparatusInSlot.connectSFX);
             audioSource.loop = true;
             audioSource.Play();
+        }
+
+        [Rpc(SendTo.Everyone, RequireOwnership = false)]
+        private void TogglePortRpc()
+        {
+            TogglePort();
         }
     }
 

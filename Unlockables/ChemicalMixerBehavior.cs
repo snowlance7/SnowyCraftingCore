@@ -74,21 +74,49 @@ namespace SnowyCraftingCore.Unlockables
             }
         }
 
-        public void Input1Trigger_Interact()
+        public void InputTriggerInteract(int flaskInputIndex)
         {
             if (localPlayer.currentlyHeldObjectServer == null || localPlayer.currentlyHeldObjectServer.itemProperties.twoHanded) { return; }
-            logger.LogDebug("Input1Trigger_Interact");
-            InputIngredientRpc(localPlayer.currentlyHeldObjectServer.NetworkObject, 1);
+            logger.LogDebug("InputTriggerInteract");
+
+            GrabbableObject item = localPlayer.currentlyHeldObjectServer;
+            NamespacedKey<DawnItemInfo> itemKey = item.itemProperties.GetDawnInfo().TypedKey;
+
+            ChemistryIngredient? ingredient = null;
+            bool despawningIngredientItem = true;
+
+            if (item is IChemistryIngredient _ingredient)
+            {
+                ingredient = _ingredient.GetIngredient();
+
+                if (_ingredient is IMixableIngredient _mixableIngredient)
+                    despawningIngredientItem = _mixableIngredient.DespawnItemAfterInput();
+            }
+
+            ingredient ??= RegisteredIngredients.Where(x => x.item == itemKey).FirstOrDefault();
+
+            if (ingredient == null)
+            {
+                Color color = UnityEngine.Random.ColorHSV();
+                ingredient = new ChemistryIngredient(itemKey, new ChemistryLiquidAppearance(color, 0));
+            }
+
+            if (despawningIngredientItem) { localPlayer.DespawnHeldObject(); }
+
+            InputIngredientRpc(ingredient, flaskInputIndex);
         }
 
-        public void Input2Trigger_Interact()
+        public void Input1Trigger_Interact() // InteractTrigger
         {
-            if (localPlayer.currentlyHeldObjectServer == null || localPlayer.currentlyHeldObjectServer.itemProperties.twoHanded) { return; }
-            logger.LogDebug("Input2Trigger_Interact");
-            InputIngredientRpc(localPlayer.currentlyHeldObjectServer.NetworkObject, 2);
+            InputTriggerInteract(1);
         }
 
-        public void OutputTrigger_Interact()
+        public void Input2Trigger_Interact() // InteractTrigger
+        {
+            InputTriggerInteract(2);
+        }
+
+        public void OutputTrigger_Interact() // InteractTrigger
         {
             if ((input1Ingredient == null || input2Ingredient == null) && outputIngredient == null) { return; }
             OutputTrigger_InteractRpc(localPlayer.actualClientId);
@@ -118,31 +146,9 @@ namespace SnowyCraftingCore.Unlockables
             outputRenderer.sharedMaterial.SetFloat("_EmissionIntensity", color.emissionIntensity);
         }
 
-        [Rpc(SendTo.Everyone)]
-        private void InputIngredientRpc(NetworkObjectReference netRef, int flaskInputIndex)
+        [Rpc(SendTo.Everyone, RequireOwnership = false)]
+        private void InputIngredientRpc(ChemistryIngredient ingredient, int flaskInputIndex)
         {
-            if (!netRef.TryGet(out NetworkObject netObj)) { return; }
-            if (!netObj.TryGetComponent(out GrabbableObject item)) { return; }
-
-            ChemistryIngredient? ingredient = null;
-            bool despawningIngredientItem = true;
-
-            if (item is IChemistryIngredient _ingredient)
-            {
-                ingredient = _ingredient.GetIngredient();
-
-                if (_ingredient is IMixableIngredient _mixableIngredient)
-                    despawningIngredientItem = _mixableIngredient.DespawnItemAfterInput();
-            }
-
-            ingredient ??= RegisteredIngredients.Where(x => x.item == item.itemProperties).FirstOrDefault();
-
-            if (ingredient == null)
-            {
-                Color color = UnityEngine.Random.ColorHSV();
-                ingredient = new ChemistryIngredient(item.itemProperties, new ChemistryLiquidAppearance(color, 0));
-            }
-
             if (flaskInputIndex == 1)
             {
                 input1Ingredient = ingredient;
@@ -153,12 +159,9 @@ namespace SnowyCraftingCore.Unlockables
                 input2Ingredient = ingredient;
                 SetInput2FlaskColor(ingredient.chemistryLiquidAppearance);
             }
-
-            if (localPlayer == item.playerHeldBy && despawningIngredientItem)
-                localPlayer.DespawnHeldObject();
         }
 
-        [Rpc(SendTo.Everyone)]
+        [Rpc(SendTo.Everyone, RequireOwnership = false)]
         private void OutputTrigger_InteractRpc(ulong clientId)
         {
             if (((input1Ingredient == null || input2Ingredient == null) && outputIngredient == null) || mixing) { return; }
@@ -177,7 +180,7 @@ namespace SnowyCraftingCore.Unlockables
 
                 if (IsServer && !(player.currentlyHeldObjectServer != null && player.currentlyHeldObjectServer is IChemistryOutputContainer container && container.ReceiveChemistryOutput(outputIngredient)))
                 {
-                    GrabbableObject? outputItem = Utils.SpawnItem(outputIngredient!.item.GetDawnInfo().TypedKey, player.transform.position);
+                    GrabbableObject? outputItem = Utils.SpawnItem(outputIngredient.item, player.transform.position);
                     if (outputItem != null)
                     {
                         IEnumerator sendSpawnOutputIngredient(string specialInstructions)
@@ -196,7 +199,7 @@ namespace SnowyCraftingCore.Unlockables
             }
         }
 
-        [Rpc(SendTo.Everyone)]
+        [Rpc(SendTo.Everyone, RequireOwnership = false)]
         private void SpawnOutputIngredientRpc(ulong clientId, NetworkObjectReference netRef, string specialInstructions)
         {
             if (!netRef.TryGet(out NetworkObject netObj)) { return; }

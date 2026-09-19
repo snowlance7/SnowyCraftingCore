@@ -666,7 +666,7 @@ namespace SnowyCraftingCore.TerminalAdditions
             routine = StartCoroutine(itemDispenseOperation());
         }
 
-        [Rpc(SendTo.Everyone)]
+        [Rpc(SendTo.Everyone, RequireOwnership = false)]
         private void SetItemInSlotRpc(NetworkObjectReference netRef)
         {
             if (!netRef.TryGet(out NetworkObject netObj)) { return; }

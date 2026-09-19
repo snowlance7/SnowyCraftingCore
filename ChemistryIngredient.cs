@@ -1,13 +1,12 @@
-﻿using SnowyCraftingCore.Unlockables;
+﻿using Dawn;
 using System;
-using System.Collections.Generic;
-using System.Text;
+using Unity.Netcode;
 
 namespace SnowyCraftingCore
 {
-    public class ChemistryIngredient(Item item, ChemistryLiquidAppearance? chemistryLiquidAppearance = default, string specialInstructions = "") : IEquatable<ChemistryIngredient>
+    public class ChemistryIngredient(NamespacedKey<DawnItemInfo> item, ChemistryLiquidAppearance? chemistryLiquidAppearance = default, string specialInstructions = "") : IEquatable<ChemistryIngredient>, INetworkSerializable
     {
-        public Item item = item;
+        public NamespacedKey<DawnItemInfo> item = item;
         public ChemistryLiquidAppearance chemistryLiquidAppearance = chemistryLiquidAppearance ?? new ChemistryLiquidAppearance();
         public string specialInstructions = specialInstructions;
 
@@ -16,9 +15,16 @@ namespace SnowyCraftingCore
             return item == other.item;
         }
 
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+        {
+            serializer.SerializeValue(ref item);
+            serializer.SerializeValue(ref chemistryLiquidAppearance);
+            serializer.SerializeValue(ref specialInstructions);
+        }
+
         public override string ToString()
         {
-            return item.name;
+            return item.Key;
         }
     }
 }

@@ -42,8 +42,6 @@ namespace SnowyCraftingCore
 
             InitializeNetworkBehaviours();
 
-            ApparatusPowerPort.InitTerminalCommands();
-
             // Finished
             Logger.LogInfo($"{MyPluginInfo.PLUGIN_GUID} v{MyPluginInfo.PLUGIN_VERSION} has loaded!");
         }

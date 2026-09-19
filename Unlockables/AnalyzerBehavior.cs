@@ -1,4 +1,5 @@
-﻿using GameNetcodeStuff;
+﻿using Dawn;
+using GameNetcodeStuff;
 using SnowyLib;
 using System.Collections.Generic;
 using System.Linq;
@@ -58,9 +59,33 @@ namespace SnowyCraftingCore.Unlockables
             {
                 GrabHeldItemRpc(localPlayer.actualClientId);
             }
-            else if (localPlayer.currentlyHeldObjectServer != null && (localPlayer.currentlyHeldObjectServer is IAnalyzableIngredient || RegisteredIngredients.Any(x => x.item == localPlayer.currentlyHeldObjectServer.itemProperties)))
+            else if (localPlayer.currentlyHeldObjectServer != null && (localPlayer.currentlyHeldObjectServer is IAnalyzableIngredient || RegisteredIngredients.Any(x => x.item == localPlayer.currentlyHeldObjectServer.itemProperties.GetDawnInfo().Key)))
             {
-                ProcessIngredientRpc(localPlayer.actualClientId, localPlayer.currentlyHeldObjectServer.NetworkObject);
+                GrabbableObject item = localPlayer.currentlyHeldObjectServer;
+                NamespacedKey<DawnItemInfo> itemKey = item.itemProperties.GetDawnInfo().TypedKey;
+                AnalyzableIngredient? ingredient = null;
+
+                if (item is IAnalyzableIngredient _ingredient)
+                {
+                    ChemistryIngredient? chemistryIngredient = _ingredient.GetIngredient();
+                    chemistryIngredient ??= new ChemistryIngredient(itemKey);
+                    ingredient = new AnalyzableIngredient(itemKey, _ingredient.OnAnalyze(), chemistryIngredient.chemistryLiquidAppearance, chemistryIngredient.specialInstructions, despawnItem: _ingredient.DespawnItemOnAnalyze(), holdItem: _ingredient.HoldItem());
+                }
+
+                ingredient ??= RegisteredIngredients.Where(x => x.item == itemKey).FirstOrDefault();
+
+                if (ingredient == null) { return; }
+
+                if (ingredient.despawnItem)
+                {
+                    localPlayer.DespawnHeldObject();
+                    ProcessIngredientRpc(ingredient);
+                }
+                else if (ingredient.holdItem)
+                {
+                    localPlayer.DiscardHeldObject(true, NetworkObject, transform.position, false);
+                    ProcessIngredientRpc(ingredient, item.NetworkObject);
+                }
             }
         }
 
@@ -71,7 +96,7 @@ namespace SnowyCraftingCore.Unlockables
             testTubeFluidRenderer.material.SetFloat("_EmissionIntensity", color.emissionIntensity);
         }
 
-        [Rpc(SendTo.Everyone)]
+        [Rpc(SendTo.Everyone, RequireOwnership = false)]
         private void GrabHeldItemRpc(ulong clientId)
         {
             if (heldObject == null) { return; }
@@ -89,39 +114,30 @@ namespace SnowyCraftingCore.Unlockables
             testTubeFluidRenderer.enabled = false;
         }
 
-        [Rpc(SendTo.Everyone)]
-        private void ProcessIngredientRpc(ulong clientId, NetworkObjectReference netRef)
+        [Rpc(SendTo.Everyone, RequireOwnership = false)]
+        private void ProcessIngredientRpc(AnalyzableIngredient ingredient)
         {
-            if (inAnimation) { return; }
-            if (!netRef.TryGet(out NetworkObject netObj)) { return; }
-            if (!netObj.TryGetComponent(out GrabbableObject item)) { return; }
+            analyzingIngredient = ingredient;
+            SetTestTubeColor(ingredient.chemistryLiquidAppearance);
 
-            AnalyzableIngredient? ingredient = null;
+            testTubeFluidRenderer.enabled = true;
+            testTubeRenderer.enabled = true;
+            inAnimation = true;
+            audioSource.Play();
+            animator.SetTrigger("spin");
+        }
 
-            if (item is IAnalyzableIngredient _ingredient)
-            {
-                ChemistryIngredient? chemistryIngredient = _ingredient.GetIngredient();
-                chemistryIngredient ??= new ChemistryIngredient(item.itemProperties);
-                ingredient = new AnalyzableIngredient(item.itemProperties, _ingredient.OnAnalyze(), chemistryIngredient.chemistryLiquidAppearance, chemistryIngredient.specialInstructions, despawnItem: _ingredient.DespawnItemOnAnalyze(), holdItem: _ingredient.HoldItem());
-            }
-
-            ingredient ??= RegisteredIngredients.Where(x => x.item == item.itemProperties).FirstOrDefault();
-
-            if (ingredient == null) { return; }
+        [Rpc(SendTo.Everyone, RequireOwnership = false)]
+        private void ProcessIngredientRpc(AnalyzableIngredient ingredient, NetworkObjectReference netRef)
+        {
+            if (!netRef.TryGet(out NetworkObject netObj)) { logger.LogError("Failed to get networkobject from networkobjectreference"); return; }
+            if (!netObj.TryGetComponent(out GrabbableObject item)) { logger.LogError("Failed to get grabbableobject from networkobject"); return; }
 
             analyzingIngredient = ingredient;
             SetTestTubeColor(ingredient.chemistryLiquidAppearance);
 
-            if (ingredient.despawnItem)
+            if (ingredient.holdItem)
             {
-                if (localPlayer == item.playerHeldBy)
-                    localPlayer.DespawnHeldObject();
-            }
-            else if (ingredient.holdItem)
-            {
-                if (localPlayer == item.playerHeldBy)
-                    localPlayer.DiscardHeldObject(true, NetworkObject, transform.position, false);
-
                 item.EnableItemMeshes(false);
                 item.EnablePhysics(false);
                 heldObject = item;
