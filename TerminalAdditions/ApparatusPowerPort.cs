@@ -48,7 +48,7 @@ namespace SnowyCraftingCore.TerminalAdditions
 
 			TerminalAPI.RegisterTerminalCommand(new TerminalCommand("power", (args) =>
 			{
-                string message = $"{(Instance!.IsOpen ? "Closing" : "Opening")} apparatus power port";
+                string message = $"{(Instance!.IsOpen ? "Closing" : "Opening")} apparatus power port\n\n";
                 Instance!.TogglePortRpc();
                 return message;
 			}, "Other", "Power", "Open/close the apparatus power port"));
@@ -127,10 +127,21 @@ namespace SnowyCraftingCore.TerminalAdditions
             }
         }
 
+        public bool CanUsePower(float amount)
+        {
+            if (apparatusInSlot == null) { return false; }
+            return ((ILungPropInterface)apparatusInSlot).CanUsePower(amount);
+        }
+
         public bool UsePower(float amount)
         {
             if (apparatusInSlot == null) { return false; }
-            return ((ILungPropInterface)apparatusInSlot).UsePower(amount);
+            bool canUsePower = ((ILungPropInterface)apparatusInSlot).CanUsePower(amount);
+            if (canUsePower)
+            {
+                UsePowerRpc(amount);
+            }
+            return canUsePower;
         }
 
         public void OnInteract() // TODO: Test this
@@ -139,6 +150,13 @@ namespace SnowyCraftingCore.TerminalAdditions
             GrabbableObject insertingItem = localPlayer.currentlyHeldObjectServer;
             localPlayer.DiscardHeldObject(true, NetworkObject, NetworkObject.transform.InverseTransformPoint(apparatusPosition.position), false);
             SetApparatusInSlotRpc(insertingItem.NetworkObject);
+        }
+
+        [Rpc(SendTo.Everyone, RequireOwnership = false)]
+        private void UsePowerRpc(float amount)
+        {
+            if (apparatusInSlot == null) { logger.LogError("Cant use power, apparatus not in slot"); return; }
+            ((ILungPropInterface)apparatusInSlot).UsePower(amount);
         }
 
         [Rpc(SendTo.Everyone, RequireOwnership = false)]

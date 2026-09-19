@@ -4,11 +4,29 @@ using System;
 
 namespace SnowyCraftingCore
 {
-    public class AnalyzableIngredient(NamespacedKey<DawnItemInfo> item, Action<AnalyzableIngredient, PlayerControllerB> result, ChemistryLiquidAppearance? chemistryLiquidAppearance = null, string specialInstructions = "", bool despawnItem = false, bool holdItem = true) : ChemistryIngredient(item, chemistryLiquidAppearance, specialInstructions), IEquatable<AnalyzableIngredient>
+    public class AnalyzableIngredient : ChemistryIngredient, IEquatable<AnalyzableIngredient>
     {
-        public Action<AnalyzableIngredient, PlayerControllerB> result = result;
-        public bool despawnItem = despawnItem;
-        public bool holdItem = holdItem;
+        public Action<AnalyzableIngredient, PlayerControllerB> result;
+        public bool holdItem;
+
+        public AnalyzableIngredient()
+        {
+            item = new NamespacedKey<DawnItemInfo>();
+            chemistryLiquidAppearance = new ChemistryLiquidAppearance();
+            specialInstructions = "";
+            result = (ingredient, player) => { };
+            holdItem = true;
+        }
+
+        public AnalyzableIngredient(NamespacedKey<DawnItemInfo> item, Action<AnalyzableIngredient, PlayerControllerB> result, ChemistryLiquidAppearance? chemistryLiquidAppearance = null, string specialInstructions = "", bool holdItem = true)
+        {
+            this.item = item;
+            this.chemistryLiquidAppearance = chemistryLiquidAppearance ?? new ChemistryLiquidAppearance();
+            this.specialInstructions = specialInstructions;
+            this.result = result;
+            this.holdItem = holdItem;
+
+        }
 
         public bool Equals(AnalyzableIngredient other)
         {

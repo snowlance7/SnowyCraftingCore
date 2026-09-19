@@ -61,31 +61,7 @@ namespace SnowyCraftingCore.Unlockables
             }
             else if (localPlayer.currentlyHeldObjectServer != null && (localPlayer.currentlyHeldObjectServer is IAnalyzableIngredient || RegisteredIngredients.Any(x => x.item == localPlayer.currentlyHeldObjectServer.itemProperties.GetDawnInfo().Key)))
             {
-                GrabbableObject item = localPlayer.currentlyHeldObjectServer;
-                NamespacedKey<DawnItemInfo> itemKey = item.itemProperties.GetDawnInfo().TypedKey;
-                AnalyzableIngredient? ingredient = null;
-
-                if (item is IAnalyzableIngredient _ingredient)
-                {
-                    ChemistryIngredient? chemistryIngredient = _ingredient.GetIngredient();
-                    chemistryIngredient ??= new ChemistryIngredient(itemKey);
-                    ingredient = new AnalyzableIngredient(itemKey, _ingredient.OnAnalyze(), chemistryIngredient.chemistryLiquidAppearance, chemistryIngredient.specialInstructions, despawnItem: _ingredient.DespawnItemOnAnalyze(), holdItem: _ingredient.HoldItem());
-                }
-
-                ingredient ??= RegisteredIngredients.Where(x => x.item == itemKey).FirstOrDefault();
-
-                if (ingredient == null) { return; }
-
-                if (ingredient.despawnItem)
-                {
-                    localPlayer.DespawnHeldObject();
-                    ProcessIngredientRpc(ingredient);
-                }
-                else if (ingredient.holdItem)
-                {
-                    localPlayer.DiscardHeldObject(true, NetworkObject, transform.position, false);
-                    ProcessIngredientRpc(ingredient, item.NetworkObject);
-                }
+                ProcessIngredientRpc(localPlayer.currentlyHeldObjectServer.NetworkObject);
             }
         }
 
@@ -115,29 +91,33 @@ namespace SnowyCraftingCore.Unlockables
         }
 
         [Rpc(SendTo.Everyone, RequireOwnership = false)]
-        private void ProcessIngredientRpc(AnalyzableIngredient ingredient)
-        {
-            analyzingIngredient = ingredient;
-            SetTestTubeColor(ingredient.chemistryLiquidAppearance);
-
-            testTubeFluidRenderer.enabled = true;
-            testTubeRenderer.enabled = true;
-            inAnimation = true;
-            audioSource.Play();
-            animator.SetTrigger("spin");
-        }
-
-        [Rpc(SendTo.Everyone, RequireOwnership = false)]
-        private void ProcessIngredientRpc(AnalyzableIngredient ingredient, NetworkObjectReference netRef)
+        private void ProcessIngredientRpc(NetworkObjectReference netRef)
         {
             if (!netRef.TryGet(out NetworkObject netObj)) { logger.LogError("Failed to get networkobject from networkobjectreference"); return; }
             if (!netObj.TryGetComponent(out GrabbableObject item)) { logger.LogError("Failed to get grabbableobject from networkobject"); return; }
+
+            NamespacedKey<DawnItemInfo> itemKey = item.itemProperties.GetDawnInfo().TypedKey;
+            AnalyzableIngredient? ingredient = null;
+
+            if (item is IAnalyzableIngredient _ingredient)
+            {
+                ChemistryIngredient? chemistryIngredient = _ingredient.GetIngredient();
+                chemistryIngredient ??= new ChemistryIngredient(itemKey);
+                ingredient = new AnalyzableIngredient(itemKey, _ingredient.OnAnalyze(), chemistryIngredient.chemistryLiquidAppearance, chemistryIngredient.specialInstructions, holdItem: _ingredient.HoldItem());
+            }
+
+            ingredient ??= RegisteredIngredients.Where(x => x.item == itemKey).FirstOrDefault();
+
+            if (ingredient == null) { return; }
 
             analyzingIngredient = ingredient;
             SetTestTubeColor(ingredient.chemistryLiquidAppearance);
 
             if (ingredient.holdItem)
             {
+                if (localPlayer == item.playerHeldBy)
+                    localPlayer.DiscardHeldObject(true, NetworkObject, transform.position, false);
+
                 item.EnableItemMeshes(false);
                 item.EnablePhysics(false);
                 heldObject = item;

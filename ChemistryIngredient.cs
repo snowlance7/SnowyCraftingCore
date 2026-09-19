@@ -4,11 +4,25 @@ using Unity.Netcode;
 
 namespace SnowyCraftingCore
 {
-    public class ChemistryIngredient(NamespacedKey<DawnItemInfo> item, ChemistryLiquidAppearance? chemistryLiquidAppearance = default, string specialInstructions = "") : IEquatable<ChemistryIngredient>, INetworkSerializable
+    public class ChemistryIngredient : IEquatable<ChemistryIngredient>, INetworkSerializable
     {
-        public NamespacedKey<DawnItemInfo> item = item;
-        public ChemistryLiquidAppearance chemistryLiquidAppearance = chemistryLiquidAppearance ?? new ChemistryLiquidAppearance();
-        public string specialInstructions = specialInstructions;
+        public NamespacedKey<DawnItemInfo> item;
+        public ChemistryLiquidAppearance chemistryLiquidAppearance;
+        public string specialInstructions;
+
+        public ChemistryIngredient()
+        {
+            item = new NamespacedKey<DawnItemInfo>();
+            chemistryLiquidAppearance = new ChemistryLiquidAppearance();
+            specialInstructions = "";
+        }
+
+        public ChemistryIngredient(NamespacedKey<DawnItemInfo> item, ChemistryLiquidAppearance? chemistryLiquidAppearance = default, string specialInstructions = "")
+        {
+            this.item = item;
+            this.chemistryLiquidAppearance = chemistryLiquidAppearance ?? new ChemistryLiquidAppearance();
+            this.specialInstructions = specialInstructions;
+        }
 
         public bool Equals(ChemistryIngredient other)
         {

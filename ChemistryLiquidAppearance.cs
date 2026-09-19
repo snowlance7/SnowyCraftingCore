@@ -6,10 +6,22 @@ using UnityEngine;
 
 namespace SnowyCraftingCore
 {
-    public struct ChemistryLiquidAppearance(Color liquidColor = default, float emissionIntensity = 0f) : INetworkSerializable
+    public struct ChemistryLiquidAppearance : INetworkSerializable
     {
-        public Color liquidColor = liquidColor;
-        public float emissionIntensity = emissionIntensity;
+        public Color liquidColor;
+        public float emissionIntensity;
+
+        public ChemistryLiquidAppearance()
+        {
+            liquidColor = new Color();
+            emissionIntensity = 0f;
+        }
+
+        public ChemistryLiquidAppearance(Color liquidColor = default, float emissionIntensity = 0f)
+        {
+            this.liquidColor = liquidColor;
+            this.emissionIntensity = emissionIntensity;
+        }
 
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
         {

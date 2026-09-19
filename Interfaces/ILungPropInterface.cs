@@ -18,6 +18,12 @@ public interface ILungPropInterface
     float StartingLightIntensity { get; set; }
 
     [HandleErrors(ErrorHandlingStrategy.LogError)]
+    public bool CanUsePower(float amount)
+    {
+        return (PowerRemaining - amount) >= 0;
+    }
+
+    [HandleErrors(ErrorHandlingStrategy.LogError)]
     public bool UsePower(float amount)
     {
         if ((PowerRemaining - amount) < 0) { return false; }
@@ -42,8 +48,6 @@ public interface ILungPropInterface
         ((LungProp)this).gameObject.transform.Find("Point Light").GetComponent<Light>().intensity = Mathf.Lerp(StartingLightIntensity, 0f, powerUsed);
         ((LungProp)this).SetScrapValue((int)Mathf.Lerp(80, 40, powerUsed));
     }
-
-
 }
 
 [HarmonyPatch]
