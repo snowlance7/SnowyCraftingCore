@@ -3,6 +3,6 @@
     public interface IChemistryIngredient
     {
         public ChemistryIngredient? GetIngredient();
-        public void OnChemicalOutput(string specialInstructions);
+        public void OnChemicalOutput(ChemistryIngredient ingredient);
     }
 }

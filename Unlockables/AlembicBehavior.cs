@@ -175,13 +175,13 @@ namespace SnowyCraftingCore.Unlockables
                 GrabbableObject? outputItem = Utils.SpawnItem(outputIngredient.item, player.transform.position);
                 if (outputItem != null)
                 {
-                    IEnumerator sendSpawnOutputIngredient(string specialInstructions)
+                    IEnumerator sendSpawnOutputIngredient(ChemistryIngredient outputIngredient)
                     {
                         yield return new WaitUntil(() => outputItem.NetworkObject != null && outputItem.NetworkObject.IsSpawned);
-                        SpawnOutputIngredientRpc(clientId, outputItem.NetworkObject, specialInstructions);
+                        SpawnOutputIngredientRpc(clientId, outputItem.NetworkObject, outputIngredient);
                     }
 
-                    StartCoroutine(sendSpawnOutputIngredient(outputIngredient.specialInstructions));
+                    StartCoroutine(sendSpawnOutputIngredient(outputIngredient));
                 }
             }
 
@@ -191,7 +191,7 @@ namespace SnowyCraftingCore.Unlockables
         }
 
         [Rpc(SendTo.Everyone, RequireOwnership = false)]
-        private void SpawnOutputIngredientRpc(ulong clientId, NetworkObjectReference netRef, string specialInstructions)
+        private void SpawnOutputIngredientRpc(ulong clientId, NetworkObjectReference netRef, ChemistryIngredient outputIngredient)
         {
             logger.LogDebug("SpawnOutputIngredientRpc");
             if (!netRef.TryGet(out NetworkObject netObj)) { logger.LogError("Failed to get network object from network object reference"); return; }
@@ -200,7 +200,7 @@ namespace SnowyCraftingCore.Unlockables
             if (item is IChemistryIngredient ingredient)
             {
                 logger.LogDebug("Outputting IChemistryIngredient");
-                ingredient.OnChemicalOutput(specialInstructions);
+                ingredient.OnChemicalOutput(outputIngredient);
             }
 
             if (localPlayer.actualClientId == clientId)
