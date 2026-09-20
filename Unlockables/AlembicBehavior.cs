@@ -106,11 +106,11 @@ namespace SnowyCraftingCore.Unlockables
             //inputRenderer.enabled = true;
             logger.LogDebug("Setting input flash color to " + color.ToString());
             inputRenderer.material.color = color.liquidColor;
-            inputRenderer.material.SetColor("_EmissionColor", color.liquidColor);
-            inputRenderer.material.SetFloat("_EmissionIntensity", color.emissionIntensity);
+            inputRenderer.material.SetColor("_EmissiveColor", color.liquidColor);
+            inputRenderer.material.SetFloat("_EmissiveIntensity", color.emissionIntensity);
             inputParticleSystemRenderer.material.color = color.liquidColor;
-            inputParticleSystemRenderer.material.SetColor("_EmissionColor", color.liquidColor);
-            inputParticleSystemRenderer.material.SetFloat("_EmissionIntensity", color.emissionIntensity);
+            inputParticleSystemRenderer.material.SetColor("_EmissiveColor", color.liquidColor);
+            inputParticleSystemRenderer.material.SetFloat("_EmissiveIntensity", color.emissionIntensity);
 
         }
 
@@ -119,8 +119,8 @@ namespace SnowyCraftingCore.Unlockables
             logger.LogDebug("Setting output flash color to " + color.ToString());
             outputRenderer.enabled = true;
             outputRenderer.sharedMaterial.color = color.liquidColor;
-            outputRenderer.sharedMaterial.SetColor("_EmissionColor", color.liquidColor);
-            outputRenderer.sharedMaterial.SetFloat("_EmissionIntensity", color.emissionIntensity);
+            outputRenderer.sharedMaterial.SetColor("_EmissiveColor", color.liquidColor);
+            outputRenderer.sharedMaterial.SetFloat("_EmissiveIntensity", color.emissionIntensity);
         }
 
         [Rpc(SendTo.Everyone, RequireOwnership = false)]

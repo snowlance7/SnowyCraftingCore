@@ -68,8 +68,8 @@ namespace SnowyCraftingCore.Unlockables
         private void SetTestTubeColor(ChemistryLiquidAppearance color)
         {
             testTubeFluidRenderer.material.color = color.liquidColor;
-            testTubeFluidRenderer.material.SetColor("_EmissionColor", color.liquidColor);
-            testTubeFluidRenderer.material.SetFloat("_EmissionIntensity", color.emissionIntensity);
+            testTubeFluidRenderer.material.SetColor("_EmissiveColor", color.liquidColor);
+            testTubeFluidRenderer.material.SetFloat("_EmissiveIntensity", color.emissionIntensity);
         }
 
         [Rpc(SendTo.Everyone, RequireOwnership = false)]

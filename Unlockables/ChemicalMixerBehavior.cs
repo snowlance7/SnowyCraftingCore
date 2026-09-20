@@ -126,24 +126,24 @@ namespace SnowyCraftingCore.Unlockables
         {
             input1Renderer.enabled = true;
             input1Renderer.sharedMaterial.color = color.liquidColor;
-            input1Renderer.sharedMaterial.SetColor("_EmissionColor", color.liquidColor);
-            input1Renderer.sharedMaterial.SetFloat("_EmissionIntensity", color.emissionIntensity);
+            input1Renderer.sharedMaterial.SetColor("_EmissiveColor", color.liquidColor);
+            input1Renderer.sharedMaterial.SetFloat("_EmissiveIntensity", color.emissionIntensity);
         }
 
         private void SetInput2FlaskColor(ChemistryLiquidAppearance color)
         {
             input2Renderer.enabled = true;
             input2Renderer.sharedMaterial.color = color.liquidColor;
-            input2Renderer.sharedMaterial.SetColor("_EmissionColor", color.liquidColor);
-            input2Renderer.sharedMaterial.SetFloat("_EmissionIntensity", color.emissionIntensity);
+            input2Renderer.sharedMaterial.SetColor("_EmissiveColor", color.liquidColor);
+            input2Renderer.sharedMaterial.SetFloat("_EmissiveIntensity", color.emissionIntensity);
         }
 
         private void SetOutputFlaskColor(ChemistryLiquidAppearance color)
         {
             outputRenderer.enabled = true;
             outputRenderer.sharedMaterial.color = color.liquidColor;
-            outputRenderer.sharedMaterial.SetColor("_EmissionColor", color.liquidColor);
-            outputRenderer.sharedMaterial.SetFloat("_EmissionIntensity", color.emissionIntensity);
+            outputRenderer.sharedMaterial.SetColor("_EmissiveColor", color.liquidColor);
+            outputRenderer.sharedMaterial.SetFloat("_EmissiveIntensity", color.emissionIntensity);
         }
 
         [Rpc(SendTo.Everyone, RequireOwnership = false)]
