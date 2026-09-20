@@ -30,6 +30,7 @@ namespace SnowyCraftingCore.TerminalAdditions
         public bool AwaitingItemPlacement => AwaitingItems.Length > 0;
 
         public Item[] AwaitingItems { get; private set; } = [];
+        public string disabledHoverTip = "Invalid item";
 
         public GrabbableObject? ItemInSlot { get; private set; }
         Vector3 itemInSlotPositionOffset = new Vector3();
@@ -61,8 +62,9 @@ namespace SnowyCraftingCore.TerminalAdditions
         private void Update()
         {
             if (localPlayer == null) { return; }
-            interactTriggerCollider.enabled = ItemInSlot == null && (AwaitingItemPlacement || DEBUG_testingSlot);
+            interactTriggerCollider.enabled = ItemInSlot == null && (AwaitingItemPlacement || DEBUG_testingSlot) && !localPlayer.twoHanded;
             interactTrigger.interactable = localPlayer.currentlyHeldObjectServer != null && (AwaitingItems.Contains(localPlayer.currentlyHeldObjectServer.itemProperties) || DEBUG_testingSlot);
+            interactTrigger.disabledHoverTip = disabledHoverTip;
         }
 
         private void LateUpdate()
@@ -114,12 +116,12 @@ namespace SnowyCraftingCore.TerminalAdditions
                 audioSource.PlayOneShot(closeSFX);
         }
 
-        public void ItemModificationOperation(DispensableItem inputItem, Action<GrabbableObject> operation, float inputTime, float operationTime, float outputTime)
+        public void ItemModificationOperation(DispensableItem inputItem, Action<GrabbableObject> operation, float inputTime, float operationTime, float outputTime, string disabledHoverTip = "Invalid item")
         {
-            ItemModificationOperation([inputItem], operation, inputTime, operationTime, outputTime);
+            ItemModificationOperation([inputItem], operation, inputTime, operationTime, outputTime, disabledHoverTip);
         }
 
-        public void ItemModificationOperation(DispensableItem[] inputItems, Action<GrabbableObject> operation, float inputTime, float operationTime, float outputTime)
+        public void ItemModificationOperation(DispensableItem[] inputItems, Action<GrabbableObject> operation, float inputTime, float operationTime, float outputTime, string disabledHoverTip = "Invalid item")
         {
             IEnumerator itemModificationOperation()
             {
@@ -129,6 +131,7 @@ namespace SnowyCraftingCore.TerminalAdditions
                 yield return new WaitForSeconds(1f);
 
                 AwaitingItems = inputItems.Select(x => x.item).ToArray();
+                this.disabledHoverTip = disabledHoverTip;
 
                 float elapsedTime = 0f;
                 while (elapsedTime < inputTime && ItemInSlot == null)
@@ -190,12 +193,12 @@ namespace SnowyCraftingCore.TerminalAdditions
             routine = StartCoroutine(itemModificationOperation());
         }
 
-        public void ItemExchangeOperation(DispensableItem inputItem, DispensableItem outputItem, float inputTime, float operationTime, float outputTime)
+        public void ItemExchangeOperation(DispensableItem inputItem, DispensableItem outputItem, float inputTime, float operationTime, float outputTime, string disabledHoverTip = "Invalid item")
         {
-            ItemExchangeOperation([inputItem], outputItem, inputTime, operationTime, outputTime);
+            ItemExchangeOperation([inputItem], outputItem, inputTime, operationTime, outputTime, disabledHoverTip);
         }
 
-        public void ItemExchangeOperation(DispensableItem[] inputItems, DispensableItem outputItem, float inputTime, float operationTime, float outputTime)
+        public void ItemExchangeOperation(DispensableItem[] inputItems, DispensableItem outputItem, float inputTime, float operationTime, float outputTime, string disabledHoverTip = "Invalid item")
         {
             IEnumerator itemExchangeOperation()
             {
@@ -206,6 +209,7 @@ namespace SnowyCraftingCore.TerminalAdditions
                 yield return new WaitForSeconds(1f);
 
                 AwaitingItems = inputItems.Select(x => x.item).ToArray();
+                this.disabledHoverTip = disabledHoverTip;
 
                 float elapsedTime = 0f;
                 while (elapsedTime < inputTime && ItemInSlot == null)
@@ -303,12 +307,12 @@ namespace SnowyCraftingCore.TerminalAdditions
             routine = StartCoroutine(itemExchangeOperation());
         }
 
-        public void ItemExchangeOperation(DispensableItem inputItem, DispensableItem outputItem, Action<GrabbableObject, GrabbableObject> operation, float inputTime, float operationTime, float outputTime)
+        public void ItemExchangeOperation(DispensableItem inputItem, DispensableItem outputItem, Action<GrabbableObject, GrabbableObject> operation, float inputTime, float operationTime, float outputTime, string disabledHoverTip = "Invalid item")
         {
-            ItemExchangeOperation([inputItem], outputItem, operation, inputTime, operationTime, outputTime);
+            ItemExchangeOperation([inputItem], outputItem, operation, inputTime, operationTime, outputTime, disabledHoverTip);
         }
 
-        public void ItemExchangeOperation(DispensableItem[] inputItems, DispensableItem outputItem, Action<GrabbableObject, GrabbableObject> operation, float inputTime, float operationTime, float outputTime)
+        public void ItemExchangeOperation(DispensableItem[] inputItems, DispensableItem outputItem, Action<GrabbableObject, GrabbableObject> operation, float inputTime, float operationTime, float outputTime, string disabledHoverTip = "Invalid item")
         {
             IEnumerator itemExchangeOperation()
             {
@@ -318,6 +322,7 @@ namespace SnowyCraftingCore.TerminalAdditions
                 yield return new WaitForSeconds(1f);
 
                 AwaitingItems = inputItems.Select(x => x.item).ToArray();
+                this.disabledHoverTip = disabledHoverTip;
 
                 float elapsedTime = 0f;
                 while (elapsedTime < inputTime && ItemInSlot == null)
@@ -419,7 +424,7 @@ namespace SnowyCraftingCore.TerminalAdditions
             routine = StartCoroutine(itemExchangeOperation());
         }
 
-        public void ItemExchangeOperation(DispensableItem[] inputItems, DispensableItem[] outputItems, Action<GrabbableObject, GrabbableObject> operation, float inputTime, float operationTime, float outputTime)
+        public void ItemExchangeOperation(DispensableItem[] inputItems, DispensableItem[] outputItems, Action<GrabbableObject, GrabbableObject> operation, float inputTime, float operationTime, float outputTime, string disabledHoverTip = "Invalid item")
         {
             IEnumerator itemExchangeOperation()
             {
@@ -429,6 +434,7 @@ namespace SnowyCraftingCore.TerminalAdditions
                 yield return new WaitForSeconds(1f);
 
                 AwaitingItems = inputItems.Select(x => x.item).ToArray();
+                this.disabledHoverTip = disabledHoverTip;
 
                 float elapsedTime = 0f;
                 while (elapsedTime < inputTime && ItemInSlot == null)
