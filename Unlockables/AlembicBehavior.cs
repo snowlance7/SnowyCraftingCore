@@ -7,8 +7,6 @@ using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
 using static SnowyCraftingCore.Plugin;
-using static Steamworks.InventoryRecipe;
-using Dawn;
 
 namespace SnowyCraftingCore.Unlockables
 {
