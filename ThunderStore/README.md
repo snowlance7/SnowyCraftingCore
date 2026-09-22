@@ -13,6 +13,5 @@ For issues and suggestions visit the [github](https://github.com/snowlance7/Snow
 
 ## Credit
 
-- [Assorted Bottle - Chemical Lab](https://skfb.ly/oST6v) by kane_sk06
 - [#3 Chemistry Dangerous - 3December2019](https://skfb.ly/6Rvyy) by Canary Games
 - [Alembic](https://skfb.ly/6sArM) by FlukierJupiter
