@@ -11,6 +11,7 @@ namespace SnowyCraftingCore.TerminalAdditions
 {
     public class SmallItemDispenser : NetworkBehaviour
     {
+        public static bool IsEnabled => SnowyCraftingCoreContentHandler.Instance.SmallItemDispenser != null;
         public static SmallItemDispenser? Instance { get; private set; } = null!;
 
         [SerializeField] AudioSource audioSource = null!;

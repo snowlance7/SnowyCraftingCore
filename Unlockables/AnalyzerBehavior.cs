@@ -11,6 +11,7 @@ namespace SnowyCraftingCore.Unlockables
 {
     internal class AnalyzerBehavior : NetworkBehaviour
     {
+        public static bool IsEnabled => LethalContent.Unlockables[SnowyCraftingCoreKeys.Analyzer] != null;
         public static List<AnalyzableIngredient> RegisteredIngredients { get; internal set; } = [];
 
         [SerializeField] Animator animator = null!;

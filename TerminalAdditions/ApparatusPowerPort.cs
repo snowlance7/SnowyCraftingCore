@@ -10,6 +10,7 @@ namespace SnowyCraftingCore.TerminalAdditions
 {
     public class ApparatusPowerPort : NetworkBehaviour
     {
+        public static bool IsEnabled => SnowyCraftingCoreContentHandler.Instance.ApparatusPowerPort != null;
         public static ApparatusPowerPort? Instance { get; private set; } = null!;
 
         [SerializeField] AudioSource audioSource = null!;

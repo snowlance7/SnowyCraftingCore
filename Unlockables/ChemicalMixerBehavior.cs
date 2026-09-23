@@ -12,6 +12,7 @@ namespace SnowyCraftingCore.Unlockables
 {
     internal class ChemicalMixerBehavior : NetworkBehaviour
     {
+        public static bool IsEnabled => LethalContent.Unlockables[SnowyCraftingCoreKeys.ChemicalMixer] != null;
         public static List<ChemistryIngredient> RegisteredIngredients { get; internal set; } = [];
         public static List<ChemistryRecipe> RegisteredRecipes { get; internal set; } = [];
 

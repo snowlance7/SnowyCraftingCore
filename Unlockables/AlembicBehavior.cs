@@ -12,6 +12,7 @@ namespace SnowyCraftingCore.Unlockables
 {
     internal class AlembicBehavior : NetworkBehaviour
     {
+        public static bool IsEnabled => LethalContent.Unlockables[SnowyCraftingCoreKeys.Alembic] != null;
         public static List<DistilleryRecipe> RegisteredRecipes { get; internal set; } = [];
 
         [SerializeField] InteractTrigger inputTrigger = null!;
