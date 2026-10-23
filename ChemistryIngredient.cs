@@ -1,52 +1,72 @@
 ﻿using Dawn;
+using SnowyCraftingCore.Unlockables;
 using System;
+using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
+using static SnowyCraftingCore.Plugin;
 
-namespace SnowyCraftingCore
+namespace SnowyCraftingCore;
+
+public class ChemistryIngredient : IEquatable<ChemistryIngredient>, INetworkSerializable
 {
-    public class ChemistryIngredient : IEquatable<ChemistryIngredient>, INetworkSerializable
+    public static List<ChemistryIngredient> RegisteredChemistryIngredients { get; private set; } = [];
+
+    public NamespacedKey<DawnItemInfo> item;
+    public ChemistryLiquidAppearance chemistryLiquidAppearance;
+    public string specialInstructions;
+
+    public ChemistryIngredient()
     {
-        public NamespacedKey<DawnItemInfo> item;
-        public ChemistryLiquidAppearance chemistryLiquidAppearance;
-        public string specialInstructions;
+        item = new NamespacedKey<DawnItemInfo>();
+        chemistryLiquidAppearance = new ChemistryLiquidAppearance();
+        specialInstructions = "";
+    }
 
-        public ChemistryIngredient()
-        {
-            item = new NamespacedKey<DawnItemInfo>();
-            chemistryLiquidAppearance = new ChemistryLiquidAppearance();
-            specialInstructions = "";
-        }
+    public ChemistryIngredient(NamespacedKey<DawnItemInfo> item, ChemistryLiquidAppearance? chemistryLiquidAppearance = default, string specialInstructions = "")
+    {
+        this.item = item;
+        this.chemistryLiquidAppearance = chemistryLiquidAppearance ?? new ChemistryLiquidAppearance();
+        this.specialInstructions = specialInstructions;
+    }
 
-        public ChemistryIngredient(NamespacedKey<DawnItemInfo> item, ChemistryLiquidAppearance? chemistryLiquidAppearance = default, string specialInstructions = "")
-        {
-            this.item = item;
-            this.chemistryLiquidAppearance = chemistryLiquidAppearance ?? new ChemistryLiquidAppearance();
-            this.specialInstructions = specialInstructions;
-        }
+    public ChemistryIngredient(NamespacedKey<DawnItemInfo> item, Color color, string specialInstructions = "")
+    {
+        this.item = item;
+        this.chemistryLiquidAppearance = new ChemistryLiquidAppearance(color);
+        this.specialInstructions = specialInstructions;
+    }
 
-        public ChemistryIngredient(NamespacedKey<DawnItemInfo> item, Color color, string specialInstructions = "")
-        {
-            this.item = item;
-            this.chemistryLiquidAppearance = new ChemistryLiquidAppearance(color);
-            this.specialInstructions = specialInstructions;
-        }
+    public bool Equals(ChemistryIngredient other)
+    {
+        return item == other.item;
+    }
 
-        public bool Equals(ChemistryIngredient other)
-        {
-            return item == other.item;
-        }
+    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+    {
+        serializer.SerializeValue(ref item);
+        serializer.SerializeValue(ref chemistryLiquidAppearance);
+        serializer.SerializeValue(ref specialInstructions);
+    }
 
-        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
-        {
-            serializer.SerializeValue(ref item);
-            serializer.SerializeValue(ref chemistryLiquidAppearance);
-            serializer.SerializeValue(ref specialInstructions);
-        }
+    public override string ToString()
+    {
+        return item.Key;
+    }
 
-        public override string ToString()
-        {
-            return item.Key;
-        }
+    public static void Register(ChemistryIngredient chemistryIngredient)
+    {
+        if (RegisteredChemistryIngredients.Contains(chemistryIngredient)) { logger.LogWarning($"Could not register chemistry ingredient {chemistryIngredient}, a similar chemistry ingredient already exists"); return; }
+        RegisteredChemistryIngredients.Add(chemistryIngredient);
+    }
+
+    public static void Register(NamespacedKey<DawnItemInfo> item, ChemistryLiquidAppearance? chemistryLiquidAppearance = default, string specialInstructions = "")
+    {
+        Register(new ChemistryIngredient(item, chemistryLiquidAppearance, specialInstructions));
+    }
+
+    public static void Register(NamespacedKey<DawnItemInfo> item, Color color, string specialInstructions = "")
+    {
+        Register(new ChemistryIngredient(item, color, specialInstructions));
     }
 }

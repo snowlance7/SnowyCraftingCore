@@ -12,7 +12,6 @@ namespace SnowyCraftingCore.Unlockables
     internal class AnalyzerBehavior : NetworkBehaviour
     {
         public static bool IsEnabled => LethalContent.Unlockables[SnowyCraftingCoreKeys.Analyzer] != null;
-        public static List<AnalyzableIngredient> RegisteredIngredients { get; internal set; } = [];
 
         [SerializeField] Animator animator = null!;
         [SerializeField] AudioSource audioSource = null!;
@@ -60,7 +59,7 @@ namespace SnowyCraftingCore.Unlockables
             {
                 GrabHeldItemRpc(localPlayer.actualClientId);
             }
-            else if (localPlayer.currentlyHeldObjectServer != null && (localPlayer.currentlyHeldObjectServer is IAnalyzableIngredient || RegisteredIngredients.Any(x => x.item == localPlayer.currentlyHeldObjectServer.itemProperties.GetDawnInfo().Key)))
+            else if (localPlayer.currentlyHeldObjectServer != null && (localPlayer.currentlyHeldObjectServer is IAnalyzableIngredient || AnalyzableIngredient.RegisteredAnalyzableIngredients.Any(x => x.item == localPlayer.currentlyHeldObjectServer.itemProperties.GetDawnInfo().Key)))
             {
                 ProcessIngredientRpc(localPlayer.currentlyHeldObjectServer.NetworkObject);
             }
@@ -107,7 +106,7 @@ namespace SnowyCraftingCore.Unlockables
                 ingredient = new AnalyzableIngredient(itemKey, _ingredient.OnAnalyze(), chemistryIngredient.chemistryLiquidAppearance, chemistryIngredient.specialInstructions, holdItem: _ingredient.HoldItem());
             }
 
-            ingredient ??= RegisteredIngredients.Where(x => x.item == itemKey).FirstOrDefault();
+            ingredient ??= AnalyzableIngredient.RegisteredAnalyzableIngredients.Where(x => x.item == itemKey).FirstOrDefault();
 
             if (ingredient == null) { return; }
 
