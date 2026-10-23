@@ -1,6 +1,7 @@
 ﻿using Dawn;
 using System;
 using Unity.Netcode;
+using UnityEngine;
 
 namespace SnowyCraftingCore
 {
@@ -21,6 +22,13 @@ namespace SnowyCraftingCore
         {
             this.item = item;
             this.chemistryLiquidAppearance = chemistryLiquidAppearance ?? new ChemistryLiquidAppearance();
+            this.specialInstructions = specialInstructions;
+        }
+
+        public ChemistryIngredient(NamespacedKey<DawnItemInfo> item, Color color, string specialInstructions = "")
+        {
+            this.item = item;
+            this.chemistryLiquidAppearance = new ChemistryLiquidAppearance(color);
             this.specialInstructions = specialInstructions;
         }
 
