@@ -39,7 +39,7 @@ public class ChemistryIngredient : IEquatable<ChemistryIngredient>, INetworkSeri
 
     public bool Equals(ChemistryIngredient other)
     {
-        return item == other.item;
+        return this.item.ToString() == other.item.ToString();
     }
 
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
@@ -68,5 +68,31 @@ public class ChemistryIngredient : IEquatable<ChemistryIngredient>, INetworkSeri
     public static void Register(NamespacedKey<DawnItemInfo> item, Color color, string specialInstructions = "")
     {
         Register(new ChemistryIngredient(item, color, specialInstructions));
+    }
+
+    public static void SetFluidColors(ref Material[] materials, ChemistryLiquidAppearance chemistryLiquidAppearance)
+    {
+        foreach (var material in materials)
+        {
+            material.color = chemistryLiquidAppearance.liquidColor;
+            if (material.IsKeywordEnabled("_EMISSION"))
+            {
+                material.SetColor("_EmissiveColor", chemistryLiquidAppearance.liquidColor);
+                material.SetFloat("_EmissiveIntensity", chemistryLiquidAppearance.emissionIntensity);
+            }
+        }
+    }
+
+    public static void SetFluidColors(ref Renderer[] renderers, ChemistryLiquidAppearance chemistryLiquidAppearance)
+    {
+        foreach (var renderer in renderers)
+        {
+            renderer.material.color = chemistryLiquidAppearance.liquidColor;
+            if (renderer.material.IsKeywordEnabled("_EMISSION"))
+            {
+                renderer.material.SetColor("_EmissiveColor", chemistryLiquidAppearance.liquidColor);
+                renderer.material.SetFloat("_EmissiveIntensity", chemistryLiquidAppearance.emissionIntensity);
+            }
+        }
     }
 }

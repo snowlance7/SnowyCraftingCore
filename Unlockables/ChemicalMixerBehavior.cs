@@ -168,6 +168,15 @@ namespace SnowyCraftingCore.Unlockables
             if (input1Ingredient != null && input2Ingredient != null && outputIngredient == null) // Mixing
             {
                 currentlyMixingRecipe = ChemistryRecipe.RegisteredChemistryRecipes.Where(x => (x.ingredientA.Equals(input1Ingredient) && x.ingredientB.Equals(input2Ingredient)) || (x.ingredientA.Equals(input2Ingredient) && x.ingredientB.Equals(input1Ingredient))).FirstOrDefault();
+                if (currentlyMixingRecipe == null)
+                {
+                    logger.LogDebug($"No recipe found for {input1Ingredient} and {input2Ingredient}\nRecipies:");
+
+                    foreach (var recipe in ChemistryRecipe.RegisteredChemistryRecipes)
+                    {
+                        logger.LogDebug($"{recipe.ingredientA} + {recipe.ingredientB}");
+                    }
+                }
 
                 mixing = true;
                 MixIngredients();
