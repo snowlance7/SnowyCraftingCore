@@ -34,6 +34,17 @@ public struct ChemistryLiquidAppearance : INetworkSerializable
         return $"Color: {liquidColor.ToString()}, EmissionIntensity: {emissionIntensity}";
     }
 
+    public static Material SetFluidColor(Material material, ChemistryLiquidAppearance chemistryLiquidAppearance)
+    {
+        material.color = chemistryLiquidAppearance.liquidColor;
+        if (material.IsKeywordEnabled("_EMISSION"))
+        {
+            material.SetColor("_EmissiveColor", chemistryLiquidAppearance.liquidColor);
+            material.SetFloat("_EmissiveIntensity", chemistryLiquidAppearance.emissionIntensity);
+        }
+        return material;
+    }
+
     public static void SetFluidColor(ref Material material, ChemistryLiquidAppearance chemistryLiquidAppearance)
     {
         material.color = chemistryLiquidAppearance.liquidColor;
