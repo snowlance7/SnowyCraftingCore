@@ -4,8 +4,6 @@ using Dawn;
 using Dusk;
 using GameNetcodeStuff;
 using HarmonyLib;
-using SnowyCraftingCore.TerminalAdditions;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;

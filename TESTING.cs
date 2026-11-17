@@ -1,10 +1,6 @@
 using HarmonyLib;
-using SnowyCraftingCore.Interfaces;
-using SnowyCraftingCore.TerminalAdditions;
-using SnowyCraftingCore.Unlockables;
 using SnowyLib;
 using static SnowyCraftingCore.Plugin;
-using UnityEngine;
 
 /* bodyparts
  * 0 head
@@ -53,25 +49,25 @@ internal static class TESTING
                 case "/recipes":
                     LogRecipies();
                     break;
-                case "/power":
-                    if (ApparatusPowerPort.Instance == null || args.Length == 1 || !float.TryParse(args[1], out float amount)) { return; }
-                    bool result = ApparatusPowerPort.Instance.UsePower(amount);
-                    HUDManager.Instance.DisplayTip("UsePower", $"UsePower {(result ? "success" : "failed")}");
-                    break;
-                case "/powera":
-                    if (args.Length == 1 || !float.TryParse(args[1], out float amount2)) { return; }
-                    var apparatus = GameObject.FindObjectOfType<LungProp>();
-                    if (apparatus == null) { return; }
-                    bool result2 = ((ILungPropInterface)apparatus).UsePower(amount2);
-                    HUDManager.Instance.DisplayTip("UsePowera", $"UsePowera {(result2 ? "success" : "failed")}");
-                    break;
+                //case "/power":
+                //    if (ApparatusPowerPort.Instance == null || args.Length == 1 || !float.TryParse(args[1], out float amount)) { return; }
+                //    bool result = ApparatusPowerPort.Instance.UsePower(amount);
+                //    HUDManager.Instance.DisplayTip("UsePower", $"UsePower {(result ? "success" : "failed")}");
+                //    break;
+                //case "/powera":
+                //    if (args.Length == 1 || !float.TryParse(args[1], out float amount2)) { return; }
+                //    var apparatus = GameObject.FindObjectOfType<LungProp>();
+                //    if (apparatus == null) { return; }
+                //    bool result2 = ((ILungPropInterface)apparatus).UsePower(amount2);
+                //    HUDManager.Instance.DisplayTip("UsePowera", $"UsePowera {(result2 ? "success" : "failed")}");
+                //    break;
                 case "/test":
                     HUDManager.Instance.DisplayTip("test", "test");
                     break;
-                case "/testport":
-                    SmallItemDispenser.DEBUG_testingSlot = !SmallItemDispenser.DEBUG_testingSlot;
-                    SmallItemDispenser.Instance?.OpenPort(SmallItemDispenser.DEBUG_testingSlot);
-                    break;
+                //case "/testport":
+                //    SmallItemDispenser.DEBUG_testingSlot = !SmallItemDispenser.DEBUG_testingSlot;
+                //    SmallItemDispenser.Instance?.OpenPort(SmallItemDispenser.DEBUG_testingSlot);
+                //    break;
                 default:
                     break;
             }
