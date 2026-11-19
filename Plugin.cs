@@ -34,7 +34,7 @@ namespace SnowyCraftingCore
 
             harmony.PatchAll();
 
-            AssetBundle? mainBundle = AssetBundle.LoadFromFile(Path.Combine(Path.GetDirectoryName(Info.Location), "snowycraftingcore_mainassets"));
+            AssetBundle? mainBundle = AssetBundle.LoadFromFile(Path.Combine(Path.GetDirectoryName(Info.Location), "snowy_crafting_core_mainassets"));
             Mod = DuskMod.RegisterMod(this, mainBundle);
             Mod.RegisterContentHandlers();
 

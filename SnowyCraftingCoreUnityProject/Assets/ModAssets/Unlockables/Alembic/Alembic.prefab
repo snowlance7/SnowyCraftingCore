@@ -216,7 +216,6 @@ MonoBehaviour:
   inputParticleSystem: {fileID: 6540181594181110023}
   outputParticleSystem: {fileID: 8277208482258728097}
   audioSource: {fileID: 1708114950328161967}
-  itemInputPosition: {fileID: 5503651546849940449}
 --- !u!1 &525251655842614982
 GameObject:
   m_ObjectHideFlags: 0
@@ -10422,7 +10421,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   unlockableID: -1
-  placeObjectSFX: {fileID: 8300000, guid: b42cefd0d3c06ae4087997221181957c, type: 3}
+  placeObjectSFX: {fileID: 8300000, guid: e3cc1361d9375cc4fb2461b5fcd75ffd, type: 3}
   parentObject: {fileID: 3708383901520279530}
   parentObjectSecondary: {fileID: 0}
   mainMesh: {fileID: 3975432589893982480}

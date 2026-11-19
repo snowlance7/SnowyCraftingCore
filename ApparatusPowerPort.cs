@@ -30,8 +30,8 @@ namespace SnowyCraftingCore
 
         static Transform HangarShipTransform => Utils.terminal!.gameObject.transform.parent.parent.parent;
 
-        static Vector3 PositionOffset => PluginInstance.Config.Bind("Apparatus Power Port Options", "Position Offset", new Vector3(-0.05f, 0.395f, -0.7f), "Position offset from the terminals position").Value;
-        static Vector3 RotationOffset => PluginInstance.Config.Bind("Apparatus Power Port Options", "Rotation Offset", new Vector3(90, 0, 0), "Rotation offset from the terminals position").Value;
+        static Vector3 PositionOffset = PluginInstance.Config.Bind("Apparatus Power Port Options", "Position Offset", new Vector3(9.4f, 5.17f, -5.8f), "Position offset from the terminals position").Value;
+        static Vector3 RotationOffset = PluginInstance.Config.Bind("Apparatus Power Port Options", "Rotation Offset", new Vector3(-90, 0, 0), "Rotation offset from the terminals position").Value;
 
         internal static void Init()
         {
