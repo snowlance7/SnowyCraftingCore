@@ -106,7 +106,7 @@ namespace SnowyCraftingCore.Unlockables
                 ingredient = new AnalyzableIngredient(itemKey, _ingredient.OnAnalyze(), chemistryIngredient.chemistryLiquidAppearance, chemistryIngredient.specialInstructions, holdItem: _ingredient.HoldItem());
             }
 
-            ingredient ??= AnalyzableIngredient.RegisteredAnalyzableIngredients.Where(x => x.item == itemKey).FirstOrDefault();
+            ingredient ??= AnalyzableIngredient.RegisteredAnalyzableIngredients.FirstOrDefault(x => x.item == itemKey);
 
             if (ingredient == null) { return; }
 

@@ -1,26 +1,10 @@
 ﻿using Dusk;
-using SnowyLib;
 using UnityEngine;
 
 namespace SnowyCraftingCore
 {
     internal class SnowyCraftingCoreContentHandler : ContentHandler<SnowyCraftingCoreContentHandler>
     {
-        //public class SmallItemDispenserAssets(DuskMod mod, string filePath) : AssetBundleLoader<SmallItemDispenserAssets>(mod, filePath)
-        //{
-        //    [LoadFromBundle("SmallItemDispenser.prefab")]
-        //    public GameObject SmallItemDispenserPrefab { get; private set; } = null!;
-        //}
-        //public SmallItemDispenserAssets? SmallItemDispenser;
-
-        //public class ApparatusPowerPortAssets(DuskMod mod, string filePath) : AssetBundleLoader<ApparatusPowerPortAssets>(mod, filePath)
-        //{
-
-        //    [LoadFromBundle("ApparatusPowerPort.prefab")]
-        //    public GameObject ApparatusPowerPortPrefab { get; private set; } = null!;
-        //}
-        //public ApparatusPowerPortAssets? ApparatusPowerPort;
-
         public class AnalyzerAssets(DuskMod mod, string filePath) : AssetBundleLoader<AnalyzerAssets>(mod, filePath) { }
         public AnalyzerAssets? Analyzer;
 
@@ -30,10 +14,19 @@ namespace SnowyCraftingCore
         public class ChemicalMixerAssets(DuskMod mod, string filePath) : AssetBundleLoader<ChemicalMixerAssets>(mod, filePath) { }
         public ChemicalMixerAssets? ChemicalMixer;
 
+        public class SnowyCraftingCoreAssetsAssets(DuskMod mod, string filePath) : AssetBundleLoader<SnowyCraftingCoreAssetsAssets>(mod, filePath)
+        {
+            [LoadFromBundle("NetworkHandler.prefab")]
+            public GameObject NetworkHandlerPrefab { get; private set; } = null!;
+
+            [LoadFromBundle("ApparatusPowerPort.prefab")]
+            public GameObject ApparatusPowerPortPrefab { get; private set; } = null!;
+        }
+        public SnowyCraftingCoreAssetsAssets? SnowyCraftingCoreAssets;
+
         public SnowyCraftingCoreContentHandler(DuskMod mod) : base(mod)
         {
-            //RegisterContent("apparatus_power_port", out ApparatusPowerPort);
-            //RegisterContent("small_item_dispenser", out SmallItemDispenser);
+            RegisterContent("snowy_crafting_core_assets", out SnowyCraftingCoreAssets);
             RegisterContent("analyzer", out Analyzer);
             RegisterContent("alembic", out Alembic);
             RegisterContent("chemical_mixer", out ChemicalMixer);

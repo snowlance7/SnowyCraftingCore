@@ -192,9 +192,8 @@ MonoBehaviour:
   onInteract:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 5169594671784287624}
-        m_TargetAssemblyTypeName: SnowyCraftingCore.TerminalAdditions.ApparatusPowerPort,
-          Snowlance.SnowyCraftingCore
+      - m_Target: {fileID: 1476043661939388825}
+        m_TargetAssemblyTypeName: SnowyCraftingCore.ApparatusPowerPort, Snowlance.SnowyCraftingCore
         m_MethodName: OnInteract
         m_Mode: 1
         m_Arguments:
@@ -272,7 +271,7 @@ GameObject:
   - component: {fileID: 3358568874092448444}
   - component: {fileID: 5649127665753209285}
   - component: {fileID: 8150398297582544614}
-  - component: {fileID: 5169594671784287624}
+  - component: {fileID: 1476043661939388825}
   m_Layer: 8
   m_Name: ApparatusPowerPort
   m_TagString: Untagged
@@ -453,7 +452,7 @@ MonoBehaviour:
   overridingLowPass: 0
   lowPassOverride: 20000
   debugLog: 0
---- !u!114 &5169594671784287624
+--- !u!114 &1476043661939388825
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -462,7 +461,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 8353390669017138785}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -296942082, guid: b4d0c9c79fc309b40ba507d54a4ce3d5, type: 3}
+  m_Script: {fileID: -1907775351, guid: b4d0c9c79fc309b40ba507d54a4ce3d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   audioSource: {fileID: 5649127665753209285}
@@ -472,4 +471,3 @@ MonoBehaviour:
   apparatusPosition: {fileID: 8641544703640818121}
   interactTrigger: {fileID: 3919762095275807632}
   interactTriggerCollider: {fileID: 260859874412476681}
-  lungApparatusUsedPrefab: {fileID: 0}

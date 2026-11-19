@@ -7,5 +7,6 @@ namespace SnowyCraftingCore
     public interface IChemistryOutputContainer
     {
         public bool ReceiveChemistryOutput(ChemistryIngredient ingredient);
+        public bool ReceiveChemistryOutputOnServer(ChemistryIngredient ingredient);
     }
 }

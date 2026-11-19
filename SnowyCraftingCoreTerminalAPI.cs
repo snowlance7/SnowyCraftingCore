@@ -1,4 +1,5 @@
 ﻿using SnowyLib;
+using static SnowyCraftingCore.Plugin;
 
 namespace SnowyCraftingCore;
 
@@ -14,11 +15,12 @@ internal static class SnowyCraftingCoreTerminalAPI
 
     public static string AnalyzeIngredient(string[] args)
     {
-        if (Utils.terminal!.groupCredits - AnalyzeCost < 0) { return $"Analysis failed. You could not afford this request!\nYour balance is {Utils.terminal.groupCredits}. Total cost of analysis is {AnalyzeCost}."; }
+        if (NetworkHandler.Instance.timeSinceRequestingAnalysis < 120) { return $"Dropship Analysis request failed. Item dropship is in use or on cooldown. Try again in {120 - NetworkHandler.Instance.timeSinceRequestingAnalysis} seconds."; }
+        if (Utils.terminal!.groupCredits - AnalyzeCost < 0) { return $"Dropship Analysis request failed. You could not afford this request!\nYour balance is {Utils.terminal.groupCredits}. Total cost of dropship analysis is {AnalyzeCost}."; }
 
-        NetworkHandler.Instance.RequestDropshipAnalysisRpc();
+        NetworkHandler.Instance.RequestDropshipAnalysisRpc(localPlayer.actualClientId);
         int newGroupCredits = Utils.terminal.groupCredits - AnalyzeCost;
         Utils.SyncGroupCredits(newGroupCredits);
-        return $"Analysis dropship requested. Dropship on route to location. Please input sample for analysis. Your new balance is {Utils.terminal.groupCredits}";
+        return $"Analysis dropship requested. Dropship on route to location. Please input sample for analysis after ship has landed. Your new balance is {Utils.terminal.groupCredits}.";
     }
 }
