@@ -34,6 +34,11 @@ internal class NetworkHandler : NetworkBehaviour
         base.OnNetworkDespawn();
     }
 
+    public void Awake()
+    {
+        timeSinceRequestingAnalysis = 120f;
+    }
+
     public void Update()
     {
         timeSinceRequestingAnalysis += Time.deltaTime;
