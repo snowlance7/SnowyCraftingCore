@@ -30,6 +30,6 @@ internal static class SnowyCraftingCoreTerminalAPI
             return "Dropship analysis cancelled.";
         });
 
-        return new TerminalResult($"You have requested the item dropship for item analysis.\nTotal cost of request is {AnalyzeCost}.\n\nPlease CONFIRM or DENY.");
+        return new TerminalResult($"You have requested the item dropship for item analysis.\nTotal cost of request is {AnalyzeCost}.\n\nPlease CONFIRM or DENY.", [callback1, callback2]);
     }
 }
