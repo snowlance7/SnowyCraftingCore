@@ -67,6 +67,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Reference Include="com.github.teamxiaolan.dawnlib.interfaces">
+        <HintPath>..\..\..\..\AppData\Roaming\com.kesomannen.gale\lethal-company\profiles\Testing\BepInEx\plugins\TeamXiaolan-DawnLib\DawnLib\com.github.teamxiaolan.dawnlib.interfaces.dll</HintPath>
+      </Reference>
       <Reference Include="MonkeyInjectionLibrary">
         <HintPath>..\..\..\..\AppData\Roaming\com.kesomannen.gale\lethal-company\profiles\Testing\BepInEx\patchers\mattymatty-MonkeyInjectionLibrary\MonkeyInjectionLibrary.dll</HintPath>
       </Reference>
