@@ -93,6 +93,7 @@ public abstract class FluidStorable : PhysicsProp, IDawnSaveData, IChemistryOutp
 
     public virtual void Fill(string fluidString, ChemistryLiquidAppearance color, bool doAnimation = false)
     {
+        IsFilled = true;
         StoredFluid = fluidString;
         SetFluidColor(color);
 
@@ -108,6 +109,7 @@ public abstract class FluidStorable : PhysicsProp, IDawnSaveData, IChemistryOutp
 
     public virtual void Empty(bool doAnimation = false, float animationTime = 1f)
     {
+        IsFilled = false;
         StoredFluid = "";
 
         if (doAnimation)
