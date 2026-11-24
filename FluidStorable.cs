@@ -11,6 +11,7 @@ namespace SnowyCraftingCore;
 public abstract class FluidStorable : PhysicsProp, IDawnSaveData, IChemistryOutputContainer, IChemistryIngredient
 {
     public FluidMaterial[] fluidMaterials = [];
+    public ChemistryLiquidAppearance defaultFluidColor = new ChemistryLiquidAppearance(Color.clear);
     
     [HideInInspector] public string StoredFluid { get; private set; } = "";
 
@@ -34,6 +35,11 @@ public abstract class FluidStorable : PhysicsProp, IDawnSaveData, IChemistryOutp
             {
                 fluidMaterial.Material.SetFloat("_EmissiveIntensity", color.emissionIntensity);
             }
+
+            if (fluidMaterial.disableRendererWhenEmpty)
+            {
+                fluidMaterial.renderer.enabled = true;
+            }
         }
 
         FluidColor = color;
@@ -51,9 +57,38 @@ public abstract class FluidStorable : PhysicsProp, IDawnSaveData, IChemistryOutp
             {
                 fluidMaterial.Material.SetColor("_EmissiveColor", color);
             }
+
+            if (fluidMaterial.disableRendererWhenEmpty)
+            {
+                fluidMaterial.renderer.enabled = true;
+            }
         }
 
         FluidColor = new ChemistryLiquidAppearance(color);
+    }
+
+    public virtual void SetFluidColorToDefault()
+    {
+        foreach (var fluidMaterial in fluidMaterials)
+        {
+            fluidMaterial.Material.color = defaultFluidColor.liquidColor;
+
+            if (fluidMaterial.Material.HasProperty("_EmissiveColor"))
+            {
+                fluidMaterial.Material.SetColor("_EmissiveColor", defaultFluidColor.liquidColor);
+            }
+            if (fluidMaterial.Material.HasProperty("_EmissiveIntensity"))
+            {
+                fluidMaterial.Material.SetFloat("_EmissiveIntensity", defaultFluidColor.emissionIntensity);
+            }
+
+            if (fluidMaterial.disableRendererWhenEmpty)
+            {
+                fluidMaterial.renderer.enabled = false;
+            }
+        }
+
+        FluidColor = defaultFluidColor;
     }
 
     public virtual void Fill(string fluidString, ChemistryLiquidAppearance color, bool doAnimation = false)
@@ -64,6 +99,10 @@ public abstract class FluidStorable : PhysicsProp, IDawnSaveData, IChemistryOutp
         if (doAnimation)
         {
             gameObject.GetComponent<Animator>()?.SetTrigger("fill");
+        }
+        else
+        {
+            gameObject.GetComponent<Animator>()?.SetTrigger("filled");
         }
     }
 
@@ -78,7 +117,8 @@ public abstract class FluidStorable : PhysicsProp, IDawnSaveData, IChemistryOutp
         }
         else
         {
-            SetFluidColor(Color.clear);
+            gameObject.GetComponent<Animator>()?.SetTrigger("emptied");
+            SetFluidColorToDefault();
         }
     }
 

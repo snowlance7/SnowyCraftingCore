@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Unity.Netcode;
+﻿using Unity.Netcode;
 using UnityEngine;
 
 namespace SnowyCraftingCore;
 
+[System.Serializable]
 public struct ChemistryLiquidAppearance : INetworkSerializable
 {
     public Color liquidColor;
