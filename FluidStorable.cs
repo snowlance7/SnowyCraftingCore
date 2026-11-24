@@ -11,7 +11,7 @@ namespace SnowyCraftingCore;
 public abstract class FluidStorable : PhysicsProp, IDawnSaveData, IChemistryOutputContainer, IChemistryIngredient
 {
     public FluidMaterial[] fluidMaterials = [];
-
+    
     [HideInInspector] public string StoredFluid { get; private set; } = "";
 
     [HideInInspector] public bool IsFilled { get; private set; } = false;
@@ -46,6 +46,11 @@ public abstract class FluidStorable : PhysicsProp, IDawnSaveData, IChemistryOutp
         foreach (var fluidMaterial in fluidMaterials)
         {
             fluidMaterial.Material.color = color;
+
+            if (fluidMaterial.Material.HasProperty("_EmissiveColor"))
+            {
+                fluidMaterial.Material.SetColor("_EmissiveColor", color);
+            }
         }
 
         FluidColor = new ChemistryLiquidAppearance(color);
