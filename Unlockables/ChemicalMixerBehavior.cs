@@ -178,7 +178,8 @@ namespace SnowyCraftingCore.Unlockables
             {
                 if (IsServer)
                 {
-                    player.SpawnAndGrabGrabbableObject(outputIngredient.item, (x) => SetOutputIngredientRpc(x.NetworkObject, outputIngredient));
+                    ChemistryIngredient ingredient = outputIngredient;
+                    player.SpawnAndGrabGrabbableObject(outputIngredient.item, (x) => SetOutputIngredientRpc(x.NetworkObject, ingredient));
                 }
             }
 

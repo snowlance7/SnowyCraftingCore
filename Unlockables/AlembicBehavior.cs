@@ -104,7 +104,7 @@ internal class AlembicBehavior : NetworkBehaviour
     private void SetInputFlaskColor(ChemistryLiquidAppearance color)
     {
         //inputRenderer.enabled = true;
-        logger.LogDebug("Setting input flash color to " + color.ToString());
+        logger.LogDebug("Setting input flask color to " + color.ToString());
         inputRenderer.material.color = color.liquidColor;
         inputRenderer.material.SetColor("_EmissiveColor", color.liquidColor);
         inputRenderer.material.SetFloat("_EmissiveIntensity", color.emissionIntensity);
@@ -116,7 +116,7 @@ internal class AlembicBehavior : NetworkBehaviour
 
     private void SetOutputFlaskColor(ChemistryLiquidAppearance color)
     {
-        logger.LogDebug("Setting output flash color to " + color.ToString());
+        logger.LogDebug("Setting output flask color to " + color.ToString());
         outputRenderer.enabled = true;
         outputRenderer.sharedMaterial.color = color.liquidColor;
         outputRenderer.sharedMaterial.SetColor("_EmissiveColor", color.liquidColor);
@@ -168,7 +168,8 @@ internal class AlembicBehavior : NetworkBehaviour
         {
             if (IsServer)
             {
-                player.SpawnAndGrabGrabbableObject(outputIngredient.item, (x) => SetOutputIngredientRpc(x.NetworkObject, outputIngredient));
+                ChemistryIngredient ingredient = outputIngredient;
+                player.SpawnAndGrabGrabbableObject(outputIngredient.item, (x) => SetOutputIngredientRpc(x.NetworkObject, ingredient));
             }
         }
 

@@ -4,6 +4,7 @@ using HarmonyLib;
 using SnowyLib;
 using System.Linq;
 using Unity.Netcode;
+using Unity.Services.Authentication.Generated;
 using UnityEngine;
 using static SnowyCraftingCore.Plugin;
 
@@ -99,7 +100,7 @@ internal class NetworkHandler : NetworkBehaviour
 
         ingredient ??= AnalyzableIngredient.RegisteredAnalyzableIngredients.FirstOrDefault(x => x.item == itemKey);
 
-        if (ingredient == null) { logger.LogError("SetDropshipAnalysisIngredient: Failed to get AnalyzableIngredient from item"); return; }
+        if (ingredient == null) { logger.LogError("SetDropshipAnalysisIngredientRpc: Failed to get AnalyzableIngredient from item"); return; }
         analyzingIngredient = ingredient;
 
         if (localPlayer.actualClientId == clientHoldingIngredientId)
@@ -116,6 +117,28 @@ internal class NetworkHandler : NetworkBehaviour
     private void InvokeAnalyzingIngredientRpc()
     {
         analyzingIngredient?.result.Invoke(analyzingIngredient, PlayerFromId(clientRequestingAnalysisId));
+    }
+
+    [Rpc(SendTo.Everyone, RequireOwnership = false)]
+    public void AnalyzeItemRpc(NetworkObjectReference netRef, ulong clientAnalyzingId)
+    {
+        if (!netRef.TryGet(out NetworkObject netObj)) { logger.LogError("AnalyzeItemRpc: Failed to get netObj from netRef"); return; }
+        var item = netObj.gameObject.GetComponent<GrabbableObject>();
+
+        NamespacedKey<DawnItemInfo> itemKey = item.itemProperties.GetDawnInfo().TypedKey;
+        AnalyzableIngredient? ingredient = null;
+
+        if (item is IAnalyzableIngredient _ingredient)
+        {
+            ChemistryIngredient? chemistryIngredient = _ingredient.GetIngredient();
+            chemistryIngredient ??= new ChemistryIngredient(itemKey);
+            ingredient = new AnalyzableIngredient(itemKey, _ingredient.OnAnalyze(), chemistryIngredient.chemistryLiquidAppearance, chemistryIngredient.specialInstructions);
+        }
+
+        ingredient ??= AnalyzableIngredient.RegisteredAnalyzableIngredients.FirstOrDefault(x => x.item == itemKey);
+
+        if (ingredient == null) { logger.LogError("AnalyzeItemRpc: Failed to get AnalyzableIngredient from item"); return; }
+        ingredient.result.Invoke(ingredient, PlayerFromId(clientAnalyzingId));
     }
 
     [Rpc(SendTo.Everyone, RequireOwnership = false)]
