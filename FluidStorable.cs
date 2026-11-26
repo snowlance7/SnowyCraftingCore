@@ -151,7 +151,7 @@ public abstract class FluidStorable : PhysicsProp, IDawnSaveData, IChemistryIngr
 
     public virtual bool OnChemicalOutput(ChemistryIngredient ingredient)
     {
-        if (IsFilled) { return false; }
+        if (IsFilled || ingredient == null) { return false; }
         Fill(ingredient.specialInstructions, ingredient.chemistryLiquidAppearance);
         return true;
     }

@@ -153,9 +153,12 @@ namespace SnowyCraftingCore.Unlockables
                 {
                     logger.LogDebug($"No recipe found for {input1Ingredient} and {input2Ingredient}\nRecipies:");
 
-                    foreach (var recipe in ChemistryRecipe.RegisteredChemistryRecipes)
+                    if (Utils.testing)
                     {
-                        logger.LogDebug($"{recipe.ingredientA} + {recipe.ingredientB}");
+                        foreach (var recipe in ChemistryRecipe.RegisteredChemistryRecipes)
+                        {
+                            logger.LogDebug($"{recipe.ingredientA} + {recipe.ingredientB}");
+                        }
                     }
                 }
 
@@ -211,6 +214,10 @@ namespace SnowyCraftingCore.Unlockables
                 if (currentlyMixingRecipe != null)
                 {
                     outputIngredient = currentlyMixingRecipe.reaction.Invoke(input1Ingredient!, input2Ingredient!);
+                }
+
+                if (outputIngredient != null)
+                {
                     SetOutputFlaskColor(outputIngredient.chemistryLiquidAppearance);
                     outputParticleSystem.Play();
                 }

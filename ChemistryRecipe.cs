@@ -1,19 +1,17 @@
-﻿using SnowyCraftingCore.Unlockables;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using static SnowyCraftingCore.Plugin;
 
 namespace SnowyCraftingCore;
 
-public class ChemistryRecipe(ChemistryIngredient ingredientA, ChemistryIngredient ingredientB, Func<ChemistryIngredient, ChemistryIngredient, ChemistryIngredient> reaction, float mixTime = -1) : IEquatable<ChemistryRecipe>
+public class ChemistryRecipe(ChemistryIngredient ingredientA, ChemistryIngredient ingredientB, Func<ChemistryIngredient, ChemistryIngredient, ChemistryIngredient?> reaction, float mixTime = -1) : IEquatable<ChemistryRecipe>
 {
     public static List<ChemistryRecipe> RegisteredChemistryRecipes { get; internal set; } = [];
 
     public ChemistryIngredient ingredientA = ingredientA;
     public ChemistryIngredient ingredientB = ingredientB;
 
-    public Func<ChemistryIngredient, ChemistryIngredient, ChemistryIngredient> reaction = reaction;
+    public Func<ChemistryIngredient, ChemistryIngredient, ChemistryIngredient?> reaction = reaction;
     public float mixTime = mixTime;
 
     public bool Equals(ChemistryRecipe other)
@@ -32,7 +30,7 @@ public class ChemistryRecipe(ChemistryIngredient ingredientA, ChemistryIngredien
         RegisteredChemistryRecipes.Add(chemistryRecipe);
     }
 
-    public static void Register(ChemistryIngredient ingredientA, ChemistryIngredient ingredientB, Func<ChemistryIngredient, ChemistryIngredient, ChemistryIngredient> reaction, float mixTime = -1)
+    public static void Register(ChemistryIngredient ingredientA, ChemistryIngredient ingredientB, Func<ChemistryIngredient, ChemistryIngredient, ChemistryIngredient?> reaction, float mixTime = -1)
     {
         Register(new ChemistryRecipe(ingredientA, ingredientB, reaction, mixTime));
     }

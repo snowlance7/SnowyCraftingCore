@@ -1,5 +1,4 @@
 ﻿using Dawn;
-using SnowyCraftingCore.Unlockables;
 using System;
 using System.Collections.Generic;
 using Unity.Netcode;
@@ -8,6 +7,7 @@ using static SnowyCraftingCore.Plugin;
 
 namespace SnowyCraftingCore;
 
+[System.Serializable]
 public class ChemistryIngredient : IEquatable<ChemistryIngredient>, INetworkSerializable
 {
     public static List<ChemistryIngredient> RegisteredChemistryIngredients { get; private set; } = [];

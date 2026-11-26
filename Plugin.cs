@@ -63,10 +63,3 @@ namespace SnowyCraftingCore
         }
     }
 }
-
-/*
-Voice.ListenForPhrase("my cool phrase", (message) => {
-    Plugin.logger.LogInfo("my cool voice phrase was said!");
-});
-https://github.com/LoafOrc/VoiceRecognitionAPI/wiki/For-Developers
-*/

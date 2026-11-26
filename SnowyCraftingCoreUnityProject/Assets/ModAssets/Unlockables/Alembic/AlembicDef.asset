@@ -42,7 +42,7 @@ MonoBehaviour:
     spawnPrefab: 1
     jumpAudio: {fileID: 0}
   <InfoNodeText>k__BackingField: An alembic distillery capable of distilling ingredients
-    for use in the chemical mixer or analyzer.
+    for use in the chemical mixer or analyzer.\n\n
   <TerminalPredicate>k__BackingField: {fileID: 0}
   <PricingStrategy>k__BackingField: {fileID: 0}
   <Cost>k__BackingField: 150

@@ -1,5 +1,4 @@
-﻿using Dawn;
-using HarmonyLib;
+﻿using HarmonyLib;
 using SnowyCraftingCore.Interfaces;
 using SnowyLib;
 using Unity.Netcode;

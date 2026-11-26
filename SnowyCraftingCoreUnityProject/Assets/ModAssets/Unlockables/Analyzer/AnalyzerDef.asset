@@ -42,7 +42,7 @@ MonoBehaviour:
     spawnPrefab: 1
     jumpAudio: {fileID: 0}
   <InfoNodeText>k__BackingField: A highly advanced and modified chemical analyzer
-    that can analyze chemicals and send its results to the terminal or other devices.
+    that can analyze chemicals and send its results to the terminal or other devices.\n\n
   <TerminalPredicate>k__BackingField: {fileID: 0}
   <PricingStrategy>k__BackingField: {fileID: 0}
   <Cost>k__BackingField: 250
