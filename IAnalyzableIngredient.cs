@@ -6,5 +6,5 @@ namespace SnowyCraftingCore;
 public interface IAnalyzableIngredient : IChemistryIngredient
 {
     public Action<AnalyzableIngredient, PlayerControllerB> OnAnalyze();
-    public bool HoldItem();
+    public bool HoldItemDuringAnalysis();
 }

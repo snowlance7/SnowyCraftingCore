@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace SnowyCraftingCore
+﻿namespace SnowyCraftingCore
 {
     public interface IChemistryOutputContainer
     {
-        public bool ReceiveChemistryOutput(ChemistryIngredient ingredient);
+        public bool OnChemicalOutput(ChemistryIngredient ingredient);
     }
 }

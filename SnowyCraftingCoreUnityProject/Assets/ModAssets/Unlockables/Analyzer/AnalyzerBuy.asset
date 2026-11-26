@@ -33,7 +33,7 @@ MonoBehaviour:
   shipUnlockableID: -1
   buyUnlockable: 0
   returnFromStorage: 0
-  itemCost: 100
+  itemCost: 250
   creatureFileID: -1
   creatureName: Analyzer
   storyLogFileID: -1

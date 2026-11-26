@@ -12,7 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e80ae96b3eb9177eea5c8f9dadbcda1, type: 3}
   m_Name: ChemicalMixerBuyConfirm
   m_EditorClassIdentifier: 
-  displayText: Ordered the chemical mixer! Your new balance is [playerCredits].
+  displayText: 'Ordered the chemical mixer! Your new balance is [playerCredits].
+
+
+'
   terminalEvent: 
   clearPreviousText: 1
   maxCharactersToType: 35
@@ -24,7 +27,7 @@ MonoBehaviour:
   shipUnlockableID: -1
   buyUnlockable: 1
   returnFromStorage: 0
-  itemCost: 200
+  itemCost: 300
   creatureFileID: -1
   creatureName: 
   storyLogFileID: -1

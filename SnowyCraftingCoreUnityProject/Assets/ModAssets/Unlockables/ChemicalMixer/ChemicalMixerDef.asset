@@ -41,10 +41,12 @@ MonoBehaviour:
     unlockedInChallengeFile: 0
     spawnPrefab: 1
     jumpAudio: {fileID: 0}
-  <InfoNodeText>k__BackingField: 
+  <InfoNodeText>k__BackingField: A mixer that can combine two ingredients into one.
+    The company is not responsible for any damages resulting from improperly mixing
+    chemicals.
   <TerminalPredicate>k__BackingField: {fileID: 0}
   <PricingStrategy>k__BackingField: {fileID: 0}
-  <Cost>k__BackingField: 200
+  <Cost>k__BackingField: 300
   <IsShipUpgrade>k__BackingField: 0
   <IsDecor>k__BackingField: 1
   <GenerateCostConfig>k__BackingField: 1

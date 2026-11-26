@@ -6,6 +6,6 @@ namespace SnowyCraftingCore
 {
     public interface IMixableIngredient : IChemistryIngredient
     {
-        public bool DespawnItemAfterInput();
+        public bool DespawnItemAfterChemicalMixerInput();
     }
 }

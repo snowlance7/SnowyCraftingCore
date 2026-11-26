@@ -76,8 +76,7 @@ namespace SnowyCraftingCore.Unlockables
         private void GrabHeldItemRpc(ulong clientId)
         {
             if (heldObject == null) { return; }
-            PlayerControllerB? player = PlayerFromId(clientId);
-            if (player == null) { return; }
+            PlayerControllerB player = PlayerFromId(clientId);
 
             heldObject.EnableItemMeshes(true);
             heldObject.EnablePhysics(true);
@@ -103,7 +102,7 @@ namespace SnowyCraftingCore.Unlockables
             {
                 ChemistryIngredient? chemistryIngredient = _ingredient.GetIngredient();
                 chemistryIngredient ??= new ChemistryIngredient(itemKey);
-                ingredient = new AnalyzableIngredient(itemKey, _ingredient.OnAnalyze(), chemistryIngredient.chemistryLiquidAppearance, chemistryIngredient.specialInstructions, holdItem: _ingredient.HoldItem());
+                ingredient = new AnalyzableIngredient(itemKey, _ingredient.OnAnalyze(), chemistryIngredient.chemistryLiquidAppearance, chemistryIngredient.specialInstructions, holdItem: _ingredient.HoldItemDuringAnalysis());
             }
 
             ingredient ??= AnalyzableIngredient.RegisteredAnalyzableIngredients.FirstOrDefault(x => x.item == itemKey);

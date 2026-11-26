@@ -8,7 +8,7 @@ using static SnowyCraftingCore.Plugin;
 
 namespace SnowyCraftingCore;
 
-public abstract class FluidStorable : PhysicsProp, IDawnSaveData, IChemistryOutputContainer, IChemistryIngredient
+public abstract class FluidStorable : PhysicsProp, IDawnSaveData, IChemistryIngredient // UPDATE/TODO: Expand this so it can store an amount of liquid
 {
     public FluidMaterial[] fluidMaterials = [];
     public ChemistryLiquidAppearance defaultFluidColor = new ChemistryLiquidAppearance(Color.clear);
@@ -149,22 +149,16 @@ public abstract class FluidStorable : PhysicsProp, IDawnSaveData, IChemistryOutp
         Fill(ingredient.specialInstructions, ingredient.chemistryLiquidAppearance);
     }
 
-    public virtual bool ReceiveChemistryOutput(ChemistryIngredient ingredient)
+    public virtual bool OnChemicalOutput(ChemistryIngredient ingredient)
     {
-        if (IsFilled || !AllowChemistryOutputContainer()) { return false; }
+        if (IsFilled) { return false; }
         Fill(ingredient.specialInstructions, ingredient.chemistryLiquidAppearance);
         return true;
     }
 
-    public abstract bool AllowChemistryOutputContainer();
-
     public virtual ChemistryIngredient? GetIngredient()
     {
+        if (!IsFilled) { return null; }
         return new ChemistryIngredient(itemProperties.GetDawnInfo().TypedKey, FluidColor, StoredFluid);
-    }
-
-    public virtual void OnChemicalOutput(ChemistryIngredient ingredient)
-    {
-        Fill(ingredient.specialInstructions, ingredient.chemistryLiquidAppearance);
     }
 }

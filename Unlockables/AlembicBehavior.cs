@@ -70,6 +70,7 @@ internal class AlembicBehavior : NetworkBehaviour
             if (ingredient != null && _ingredient is IDistillableIngredient distillableIngredient)
             {
                 ChemistryIngredient? outputIngredient = distillableIngredient.DistilleryOutput();
+                if (outputIngredient == null) { return; }
                 float mixTime = distillableIngredient.DistilleryMixTime();
                 despawningIngredientItem = distillableIngredient.DespawnItemAfterDistilleryInput();
 
@@ -80,15 +81,15 @@ internal class AlembicBehavior : NetworkBehaviour
             }
         }
 
-        ingredient ??= ChemistryIngredient.RegisteredChemistryIngredients.Where(x => x.item == itemKey).FirstOrDefault();
+        ingredient ??= ChemistryIngredient.RegisteredChemistryIngredients.FirstOrDefault(x => x.item == itemKey);
 
         if (ingredient == null)
         {
-            logger.LogDebug($"Unable to find registered ingredient for {item.name}, creating default ingredient");
-            Color color = UnityEngine.Random.ColorHSV();
-            ingredient = new ChemistryIngredient(itemKey, new ChemistryLiquidAppearance(color, 5f));
+            logger.LogDebug($"Unable to find registered ingredient for {item.name}");
+            return;
+            //ingredient = new ChemistryIngredient(itemKey, new ChemistryLiquidAppearance(UnityEngine.Random.ColorHSV(), 5f));
         }
-
+        
         if (despawningIngredientItem) { localPlayer.DespawnHeldObject(); }
 
         InputIngredientRpc(ingredient);
@@ -130,13 +131,10 @@ internal class AlembicBehavior : NetworkBehaviour
         inputIngredient = null;
         currentlyMixingRecipe = null;
 
-
-
-
         inputIngredient = ingredient;
         SetInputFlaskColor(ingredient.chemistryLiquidAppearance);
 
-        currentlyMixingRecipe ??= DistilleryRecipe.RegisteredDistilleryRecipes.Where(x => x.ingredient.Equals(ingredient)).FirstOrDefault();
+        currentlyMixingRecipe ??= DistilleryRecipe.RegisteredDistilleryRecipes.FirstOrDefault(x => x.ingredient.Equals(ingredient));
         logger.LogDebug(currentlyMixingRecipe != null ? "Recipe found" : "Recipe not found");
 
         mixing = true;
@@ -152,7 +150,7 @@ internal class AlembicBehavior : NetworkBehaviour
         currentlyMixingRecipe = new DistilleryFixedOutputReaction(ingredient, outputIngredient, mixTime);
         SetInputFlaskColor(ingredient.chemistryLiquidAppearance);
 
-        currentlyMixingRecipe ??= DistilleryRecipe.RegisteredDistilleryRecipes.Where(x => x.ingredient.Equals(ingredient)).FirstOrDefault();
+        currentlyMixingRecipe ??= DistilleryRecipe.RegisteredDistilleryRecipes.FirstOrDefault(x => x.ingredient.Equals(ingredient));
         logger.LogDebug(currentlyMixingRecipe != null ? "Recipe found" : "Recipe not found");
 
         mixing = true;
@@ -164,21 +162,13 @@ internal class AlembicBehavior : NetworkBehaviour
     {
         if (outputIngredient == null || mixing) { return; }
 
-        PlayerControllerB? player = PlayerFromId(clientId);
-        if (player == null) { return; }
+        PlayerControllerB player = PlayerFromId(clientId);
 
-        if (IsServer && !(player.currentlyHeldObjectServer != null && player.currentlyHeldObjectServer is IChemistryOutputContainer container && container.ReceiveChemistryOutput(outputIngredient)))
+        if (!(player.currentlyHeldObjectServer != null && player.currentlyHeldObjectServer is IChemistryOutputContainer container && container.OnChemicalOutput(outputIngredient)))
         {
-            GrabbableObject? outputItem = Utils.SpawnItem(outputIngredient.item, player.transform.position);
-            if (outputItem != null)
+            if (IsServer)
             {
-                IEnumerator sendSpawnOutputIngredient(ChemistryIngredient outputIngredient)
-                {
-                    yield return new WaitUntil(() => outputItem.NetworkObject != null && outputItem.NetworkObject.IsSpawned);
-                    SpawnOutputIngredientRpc(clientId, outputItem.NetworkObject, outputIngredient);
-                }
-
-                StartCoroutine(sendSpawnOutputIngredient(outputIngredient));
+                player.SpawnAndGrabGrabbableObject(outputIngredient.item, (x) => SetOutputIngredientRpc(x.NetworkObject, outputIngredient));
             }
         }
 
@@ -188,7 +178,7 @@ internal class AlembicBehavior : NetworkBehaviour
     }
 
     [Rpc(SendTo.Everyone, RequireOwnership = false)]
-    private void SpawnOutputIngredientRpc(ulong clientId, NetworkObjectReference netRef, ChemistryIngredient outputIngredient)
+    private void SetOutputIngredientRpc(NetworkObjectReference netRef, ChemistryIngredient outputIngredient)
     {
         logger.LogDebug("SpawnOutputIngredientRpc");
         if (!netRef.TryGet(out NetworkObject netObj)) { logger.LogError("Failed to get network object from network object reference"); return; }
@@ -199,9 +189,6 @@ internal class AlembicBehavior : NetworkBehaviour
             logger.LogDebug("Outputting IChemistryIngredient");
             ingredient.OnChemicalOutput(outputIngredient);
         }
-
-        if (localPlayer.actualClientId == clientId)
-            localPlayer.GrabGrabbableObject(item);
     }
 
     private void MixIngredients()

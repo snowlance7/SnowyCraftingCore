@@ -33,7 +33,7 @@ MonoBehaviour:
   shipUnlockableID: -1
   buyUnlockable: 0
   returnFromStorage: 0
-  itemCost: 200
+  itemCost: 300
   creatureFileID: -1
   creatureName: Chemical Mixer
   storyLogFileID: -1

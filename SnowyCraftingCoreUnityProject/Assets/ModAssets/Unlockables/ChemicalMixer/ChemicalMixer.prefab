@@ -520,8 +520,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 507293d35d7a13e5b9ca9bb60e082e11, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hoverIcon: {fileID: 21300000, guid: f857ddabe1648564d92d1cdaba9e042e, type: 3}
-  hoverTip: Mix [E]
+  hoverIcon: {fileID: 21300000, guid: 540d63f6f0bcc844a945fa9318866abb, type: 3}
+  hoverTip: Take Ingredient [E]
   disabledHoverIcon: {fileID: 0}
   disabledHoverTip: 
   interactable: 1
@@ -984,8 +984,8 @@ MonoBehaviour:
   outputParticleSystem: {fileID: 7661257191483789933}
   audioSource: {fileID: 7128572915143215320}
   explosionPosition: {fileID: 752599446940292463}
-  mixIcon: {fileID: 21300000, guid: f857ddabe1648564d92d1cdaba9e042e, type: 3}
-  handIcon: {fileID: 21300000, guid: 540d63f6f0bcc844a945fa9318866abb, type: 3}
+  mixIcon: {fileID: 0}
+  handIcon: {fileID: 0}
 --- !u!1 &5414942105381323028
 GameObject:
   m_ObjectHideFlags: 0

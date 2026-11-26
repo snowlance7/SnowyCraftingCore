@@ -52,8 +52,7 @@ internal class NetworkHandler : NetworkBehaviour
 
         if (!IsServer) { return; }
 
-
-        ItemDropshipOperations.RequestOperation(new OperationCondition((player) =>
+        ItemDropshipOperations.Request(new OperationCondition((player) =>
         {
             NamespacedKey<DawnItemInfo> itemKey = player.currentlyHeldObjectServer.itemProperties.GetDawnInfo().TypedKey;
             AnalyzableIngredient? ingredient = null;
@@ -95,7 +94,7 @@ internal class NetworkHandler : NetworkBehaviour
         {
             ChemistryIngredient? chemistryIngredient = _ingredient.GetIngredient();
             chemistryIngredient ??= new ChemistryIngredient(itemKey);
-            ingredient = new AnalyzableIngredient(itemKey, _ingredient.OnAnalyze(), chemistryIngredient.chemistryLiquidAppearance, chemistryIngredient.specialInstructions, holdItem: _ingredient.HoldItem());
+            ingredient = new AnalyzableIngredient(itemKey, _ingredient.OnAnalyze(), chemistryIngredient.chemistryLiquidAppearance, chemistryIngredient.specialInstructions, holdItem: _ingredient.HoldItemDuringAnalysis());
         }
 
         ingredient ??= AnalyzableIngredient.RegisteredAnalyzableIngredients.FirstOrDefault(x => x.item == itemKey);

@@ -33,9 +33,6 @@ namespace SnowyCraftingCore.Unlockables
         [SerializeField] AudioSource audioSource = null!;
         [SerializeField] Transform explosionPosition = null!;
 
-        [SerializeField] Sprite mixIcon = null!;
-        [SerializeField] Sprite handIcon = null!;
-
         ChemistryIngredient? input1Ingredient;
         ChemistryIngredient? input2Ingredient;
         ChemistryIngredient? outputIngredient;
@@ -59,23 +56,12 @@ namespace SnowyCraftingCore.Unlockables
 
             input2TriggerCollider.enabled = input2Ingredient == null && localPlayer.currentlyHeldObjectServer != null;
 
-            outputTriggerCollider.enabled = (input1Ingredient != null && input2Ingredient != null) || outputIngredient != null;
-
-            if (input1Ingredient != null && input2Ingredient != null && outputIngredient == null)
-            {
-                outputTrigger.hoverTip = "Mix [E]";
-                outputTrigger.hoverIcon = mixIcon;
-            }
-            else if (outputIngredient != null)
-            {
-                outputTrigger.hoverTip = "Take Ingredient [E]";
-                outputTrigger.hoverIcon = handIcon;
-            }
+            outputTriggerCollider.enabled = outputIngredient != null;
         }
 
         public void InputTriggerInteract(int flaskInputIndex)
         {
-            if (localPlayer.currentlyHeldObjectServer == null || localPlayer.currentlyHeldObjectServer.itemProperties.twoHanded) { return; }
+            if (localPlayer.currentlyHeldObjectServer == null) { return; }
             logger.LogDebug("InputTriggerInteract");
 
             GrabbableObject item = localPlayer.currentlyHeldObjectServer;
@@ -89,15 +75,16 @@ namespace SnowyCraftingCore.Unlockables
                 ingredient = _ingredient.GetIngredient();
 
                 if (_ingredient is IMixableIngredient _mixableIngredient)
-                    despawningIngredientItem = _mixableIngredient.DespawnItemAfterInput();
+                    despawningIngredientItem = _mixableIngredient.DespawnItemAfterChemicalMixerInput();
             }
 
-            ingredient ??= ChemistryIngredient.RegisteredChemistryIngredients.Where(x => x.item == itemKey).FirstOrDefault();
+            ingredient ??= ChemistryIngredient.RegisteredChemistryIngredients.FirstOrDefault(x => x.item == itemKey);
 
             if (ingredient == null)
             {
-                Color color = UnityEngine.Random.ColorHSV();
-                ingredient = new ChemistryIngredient(itemKey, new ChemistryLiquidAppearance(color, 0));
+                logger.LogDebug($"Unable to find registered ingredient for {item.name}");
+                return;
+                //ingredient = new ChemistryIngredient(itemKey, new ChemistryLiquidAppearance(UnityEngine.Random.ColorHSV(), 0));
             }
 
             if (despawningIngredientItem) { localPlayer.DespawnHeldObject(); }
@@ -117,7 +104,7 @@ namespace SnowyCraftingCore.Unlockables
 
         public void OutputTrigger_Interact() // InteractTrigger
         {
-            if ((input1Ingredient == null || input2Ingredient == null) && outputIngredient == null) { return; }
+            if (outputIngredient == null || mixing) { return; }
             OutputTrigger_InteractRpc(localPlayer.actualClientId);
         }
 
@@ -158,16 +145,10 @@ namespace SnowyCraftingCore.Unlockables
                 input2Ingredient = ingredient;
                 SetInput2FlaskColor(ingredient.chemistryLiquidAppearance);
             }
-        }
 
-        [Rpc(SendTo.Everyone, RequireOwnership = false)]
-        private void OutputTrigger_InteractRpc(ulong clientId)
-        {
-            if (((input1Ingredient == null || input2Ingredient == null) && outputIngredient == null) || mixing) { return; }
-
-            if (input1Ingredient != null && input2Ingredient != null && outputIngredient == null) // Mixing
+            if (input1Ingredient != null && input2Ingredient != null)
             {
-                currentlyMixingRecipe = ChemistryRecipe.RegisteredChemistryRecipes.Where(x => (x.ingredientA.Equals(input1Ingredient) && x.ingredientB.Equals(input2Ingredient)) || (x.ingredientA.Equals(input2Ingredient) && x.ingredientB.Equals(input1Ingredient))).FirstOrDefault();
+                currentlyMixingRecipe = ChemistryRecipe.RegisteredChemistryRecipes.FirstOrDefault(x => (x.ingredientA.Equals(input1Ingredient) && x.ingredientB.Equals(input2Ingredient)) || (x.ingredientA.Equals(input2Ingredient) && x.ingredientB.Equals(input1Ingredient)));
                 if (currentlyMixingRecipe == null)
                 {
                     logger.LogDebug($"No recipe found for {input1Ingredient} and {input2Ingredient}\nRecipies:");
@@ -181,43 +162,36 @@ namespace SnowyCraftingCore.Unlockables
                 mixing = true;
                 MixIngredients();
             }
-            else if (outputIngredient != null) // Taking ingredient
-            {
-                PlayerControllerB? player = PlayerFromId(clientId);
-                if (player == null) { return; }
-
-                if (IsServer && !(player.currentlyHeldObjectServer != null && player.currentlyHeldObjectServer is IChemistryOutputContainer container && container.ReceiveChemistryOutput(outputIngredient)))
-                {
-                    GrabbableObject? outputItem = Utils.SpawnItem(outputIngredient.item, player.transform.position);
-                    if (outputItem != null)
-                    {
-                        IEnumerator sendSpawnOutputIngredient(ChemistryIngredient outputIngredient)
-                        {
-                            yield return new WaitUntil(() => outputItem.NetworkObject != null && outputItem.NetworkObject.IsSpawned);
-                            SpawnOutputIngredientRpc(clientId, outputItem.NetworkObject, outputIngredient);
-                        }
-
-                        StartCoroutine(sendSpawnOutputIngredient(outputIngredient));
-                    }
-                }
-
-                outputParticleSystem.Stop();
-                outputRenderer.enabled = false;
-                outputIngredient = null;
-            }
         }
 
         [Rpc(SendTo.Everyone, RequireOwnership = false)]
-        private void SpawnOutputIngredientRpc(ulong clientId, NetworkObjectReference netRef, ChemistryIngredient outputIngredient)
+        private void OutputTrigger_InteractRpc(ulong clientId)
+        {
+            if (outputIngredient == null || mixing) { return; }
+
+            PlayerControllerB player = PlayerFromId(clientId);
+
+            if (!(player.currentlyHeldObjectServer != null && player.currentlyHeldObjectServer is IChemistryOutputContainer container && container.OnChemicalOutput(outputIngredient)))
+            {
+                if (IsServer)
+                {
+                    player.SpawnAndGrabGrabbableObject(outputIngredient.item, (x) => SetOutputIngredientRpc(x.NetworkObject, outputIngredient));
+                }
+            }
+
+            outputParticleSystem.Stop();
+            outputRenderer.enabled = false;
+            outputIngredient = null;
+        }
+
+        [Rpc(SendTo.Everyone, RequireOwnership = false)]
+        private void SetOutputIngredientRpc(NetworkObjectReference netRef, ChemistryIngredient outputIngredient)
         {
             if (!netRef.TryGet(out NetworkObject netObj)) { return; }
             if (!netObj.TryGetComponent(out GrabbableObject item)) { return; }
 
             if (item is IChemistryIngredient ingredient)
                 ingredient.OnChemicalOutput(outputIngredient);
-
-            if (localPlayer.actualClientId == clientId)
-                localPlayer.GrabGrabbableObject(item);
         }
 
         private void MixIngredients()
@@ -242,7 +216,7 @@ namespace SnowyCraftingCore.Unlockables
                 }
                 else
                 {
-                    Landmine.SpawnExplosion(explosionPosition.position, true, killRange: 0, nonLethalDamage: 5, physicsForce: 5f);
+                    Landmine.SpawnExplosion(explosionPosition.position, true, killRange: 0, nonLethalDamage: 0, physicsForce: 5f);
                 }
 
                 currentlyMixingRecipe = null;
